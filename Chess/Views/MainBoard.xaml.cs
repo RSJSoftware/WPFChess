@@ -178,15 +178,13 @@ namespace Chess.Views
 		private void HighlightBorders()
 		{
 			highlightedCells.Clear();
-			if (!board.LegalMoves.TryGetValue(selectedCell.Name, out List<Move> legalMoves))
+			if (board.LegalMoves.Count <= 0)
 				return;
 
-			board.TestMoves(selectedCell.Name);
-
-			foreach(Move move in legalMoves)
+			foreach(Move move in board.LegalMoves)
                {
-                    highlightedCells.Add(VariableManager.GetCells().Where(x => x.Name == move.End).FirstOrDefault());
-
+				if(selectedCell.Name == move.Start)
+					highlightedCells.Add(VariableManager.GetCells().Where(x => x.Name == move.End).FirstOrDefault());
                }
 
 			foreach (Cell c in highlightedCells)

@@ -1,9 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Threading;
-using System.Linq;
-using System.Threading.Tasks;
 using Chess.BoardManager;
 
 namespace Chess.Perft
@@ -28,25 +25,19 @@ namespace Chess.Perft
 				return;
 			}
 
-			Dictionary<Sq, List<Move>> moveDic = new Dictionary<Sq, List<Move>>(board.LegalMoves);
-			foreach (var moveList in moveDic)
+			//calculate new moves to be checked (here so new moves are not calculated at the leaf nodes)
+			board.LegalMoves = board.Board.GetMoveDictionary(board.Turn, board.EnPassantSquare, board.CastleRights);
+
+			List<Move> moveList = new List<Move>(board.LegalMoves);
+			foreach (Move move in moveList)
 			{
-				foreach (Move move in moveList.Value)
-				{
-					if (!MovePiece(board, move))
-						continue;
-					//string debugLine = $"mov: {Driver.nodes}, cap: {Driver.captures}, ep: {Driver.enPassants}, " +
-					//$"cas: {Driver.castles}, pro: {Driver.promotions}, che: {Driver.checks}, mat: {Driver.checkmates}, time: {Driver.stopwatch.ElapsedMilliseconds}ms ";
-					//Console.WriteLine(depth + " " + copy.ToString() + " " + debugLine);
-					if (move.TakePiece != Piece.None) captures++;
-					if (move.CastleMove != Castle.None) castles++;
-					if (move.PromotePiece != Piece.None) promotions++;
-					if (board.Board.IsInCheck(board.Turn)) checks++;
-					if (move.EnPassant) { captures++; enPassants++; }
-					if (board.IsMate) { checkmates++; }
-					RecursiveDriver(depth - 1, board);
-					board.UnmoveBits();
-				}
+				if (!MovePiece(board, move))
+					continue;
+				//string debugLine = $"mov: {Driver.nodes}, cap: {Driver.captures}, ep: {Driver.enPassants}, " +
+				//$"cas: {Driver.castles}, pro: {Driver.promotions}, che: {Driver.checks}, mat: {Driver.checkmates}, time: {Driver.stopwatch.ElapsedMilliseconds}ms ";
+				//Console.WriteLine(depth + " " + copy.ToString() + " " + debugLine);
+				RecursiveDriver(depth - 1, board);
+				board.UnmoveBits();
 			}
 		}
 
@@ -61,25 +52,15 @@ namespace Chess.Perft
 				return;
 			}
 
-			Dictionary<Sq, List<Move>> moveDic = new Dictionary<Sq, List<Move>>(board.LegalMoves);
-
-			foreach (var moveList in moveDic)
+			List<Move> moveList = new List<Move>(board.LegalMoves);
+			foreach (Move move in moveList)
 			{
-				foreach (Move move in moveList.Value)
-				{
-					long currentNode = nodes;
-					if (!MovePiece(board, move))
-						continue;
-					if (move.TakePiece != Piece.None) captures++;
-					if (move.CastleMove != Castle.None) castles++;
-					if (move.PromotePiece != Piece.None) promotions++;
-					if (board.Board.IsInCheck(board.Turn)) checks++;
-					if (move.EnPassant) { captures++; enPassants++; }
-					if (board.IsMate) { checkmates++; }
-					RecursiveDriver(depth - 1, board);
-					board.UnmoveBits();
-					moveDebug += move + ": " + (nodes - currentNode) + "\n";
-				}
+				long currentNode = nodes;
+				if (!MovePiece(board, move))
+					continue;
+				RecursiveDriver(depth - 1, board);
+				board.UnmoveBits();
+				moveDebug += move + ": " + (nodes - currentNode) + "\n";
 			}
 			stopwatch.Stop();
 		}
@@ -151,12 +132,9 @@ namespace Chess.Perft
 					board.CastleRights ^= Castle.BlackQueenCastle;
 			}
 
-			//change turns and calculate new moves
+			//change turns
 			board.ChangeTurn();
-			board.LegalMoves = board.Board.GetMoveDictionary(board.Turn, board.EnPassantSquare, board.CastleRights);
 
-			//check mate
-			board.IsMate = board.CheckForMate();
 			return true;
 		}
 

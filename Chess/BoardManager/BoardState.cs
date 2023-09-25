@@ -1,11 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Text.RegularExpressions;
-using System.Linq;
-using System.Threading.Tasks;
-using System.Windows;
-using System.Windows.Documents;
 
 //Board State should keep track of piece position, turn, castling rights, en passant, and halfmove checks
 namespace Chess.BoardManager
@@ -21,7 +16,7 @@ namespace Chess.BoardManager
 		public int HalfMove { get; set; }
 		public int FullMove { get; set; }
 		public bool IsMate { get; set; }
-		public Dictionary<Sq, List<Move>> LegalMoves { get; set; }
+		public List<Move> LegalMoves { get; set; }
 		public Stack<BoardState> MoveHistory { get; set; }
 		public List<string> MoveList { get; set; }
 
@@ -176,19 +171,12 @@ namespace Chess.BoardManager
 		//return true if a piece successfully moved, return false if it doesn't
 		public bool MovePiece(Sq start, Sq end, Piece promotePiece)
 		{
-			//make sure a piece is trying to move
-			if (!LegalMoves.TryGetValue(start, out List<Move> moves))
-			{
-				Console.WriteLine("ERROR: Piece at " + start + " does not exist in legal move dictionary.");
-				return false;
-			}
-
 			//find legal move in the list, printing an error if it doesn't exist
 			Move move = null;
 			ulong possibleMoves = 0UL;
-			foreach (Move m in moves)
+			foreach (Move m in LegalMoves)
 			{
-				if (m.End == end && m.PromotePiece == promotePiece)
+				if (m.Start == start && m.End == end && m.PromotePiece == promotePiece)
 				{
 					move = m;
 				}
@@ -197,7 +185,7 @@ namespace Chess.BoardManager
 
 			if (move == null)
 			{
-				Console.WriteLine("ERROR: Piece at " + start + " cannot move to " + end + " legal move bitboard: ");
+				Console.WriteLine("ERROR: Move " + start + "" + end + " Does not exist. Legal move bitboard:");
 
 				BitboardController.printBitboard(possibleMoves, (int)start);
 				return false;
@@ -211,33 +199,21 @@ namespace Chess.BoardManager
 			string otherPiece = "";
 			bool sameRank = false;
 			bool sameFile = false;
-			int otherPieceCount = 0;
-			ulong pieces = Board.GetBitboard(movePiece, Turn);
+			int moveCount = 0;
 
-			while (pieces != 0)
+			//find and cache all moves that are by the same type of piece that can end on the same square as the original that are not the original
+			foreach (Move m in LegalMoves)
 			{
-				int lsbit = BitboardController.GetLSBitIndex(pieces);
-
-				//check to see if another piece of the same type can go to the same square
-				if (lsbit != (int)start)
+				if (m.End == end && m.MovePiece == movePiece && m.Start != start)
 				{
-					if (!LegalMoves.TryGetValue(start, out List<Move> moves)) continue;
+					//find if the piece is on the same file or rank
+					if (((int)start % 8) == ((int)m.Start % 8))
+						sameFile = true;
+					else if (((int)start / 8) == ((int)m.Start / 8))
+						sameRank = true;
 
-					foreach (Move m in moves)
-					{
-						if (m.End == end)
-						{
-							if (((int)start % 8) == (lsbit % 8))
-								sameFile = true;
-							else if (((int)start / 8) == (lsbit / 8))
-								sameRank = true;
-
-							otherPieceCount++;
-						}
-					}
+					moveCount++;
 				}
-
-				pieces = BitboardController.PopBit(pieces, lsbit);
 			}
 
 			//return the whole start coord if other pieces are on the same file and rank
@@ -247,7 +223,7 @@ namespace Chess.BoardManager
 			else if (sameFile)
 				otherPiece += BitboardController.squareToCoord[(int)start][1];
 			//return just file if there are other pieces otherwise
-			else if (otherPieceCount > 0)
+			else if (moveCount > 0)
 				otherPiece += BitboardController.squareToCoord[(int)start][0];
 
 			return otherPiece;
@@ -297,7 +273,7 @@ namespace Chess.BoardManager
 
 		public void UnmoveBits()
 		{
-			if(MoveHistory.Count == 0)
+			if (MoveHistory.Count == 0)
 			{
 				Console.WriteLine("ERROR: move history is empty.");
 				PrintBoard();
@@ -571,11 +547,9 @@ namespace Chess.BoardManager
 
 		public bool CheckForMate()
 		{
-			foreach (var kvp in LegalMoves)
-			{
-				if (kvp.Value.Count > 0)
-					return false;
-			}
+			TestMoves();
+			if (LegalMoves.Count > 0)
+				return false;
 
 			return true;
 		}
@@ -591,13 +565,13 @@ namespace Chess.BoardManager
 		}
 
 		//test all moves from the start square to find which are allowed or not for gui visualization
-		public void TestMoves(Sq start)
+		public void TestMoves()
 		{
 			Player opponent = (Turn == Player.White) ? Player.Black : Player.White;
 			List<bool> movesToRemove = new List<bool>();
 
 			//test all moves from the start square to find which are allowed or not for gui visualization
-			foreach (Move m in LegalMoves[start])
+			foreach (Move m in LegalMoves)
 			{
 				//save the current board state before starting move
 				MoveHistory.Push(new BoardState(this));
@@ -615,7 +589,7 @@ namespace Chess.BoardManager
 			for (int i = movesToRemove.Count - 1; i >= 0; i--)
 			{
 				if (movesToRemove[i])
-					LegalMoves[start].RemoveAt(i);
+					LegalMoves.RemoveAt(i);
 			}
 		}
 

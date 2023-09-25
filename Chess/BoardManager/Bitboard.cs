@@ -1,8 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Chess.BoardManager
 {
@@ -130,16 +127,14 @@ namespace Chess.BoardManager
 			return legalMoves;
 		}
 
-		public Dictionary<Sq, List<Move>> GetPieceMoves(Piece piece, Player player, Sq enPassSq)
+		public List<Move> GetPieceMoves(Piece piece, Player player, Sq enPassSq)
 		{
-			Dictionary<Sq, List<Move>> moveDic = new Dictionary<Sq, List<Move>>();
-			//get piece board
+			List<Move> allMoves = new List<Move>();
+			//get piece and occupancy boards
 			ulong pieces = GetBitboard(piece, player);
-			List<Move> moveList;
-			int opponent = (player == Player.White) ? (int)Player.Black : (int)Player.White;
-
-			//initialize variables for specific pieces
 			ulong occupancy = occBitboards[0] | occBitboards[1];
+			int opponent = (player == Player.White) ? (int)Player.Black : (int)Player.White;
+			ulong rank = (player == Player.White) ? BitboardController.eighthRank : BitboardController.firstRank;
 
 			//get precalculated attacks for each piece on board using least significant bit, then popping that bit
 			while (pieces != 0)
@@ -167,9 +162,7 @@ namespace Chess.BoardManager
 					case Piece.King: moves |= BitboardController.arrKingAttacks[lsbit] & ~occBitboards[(int)player]; break;
 				}
 
-				//convert move bitboard to calculated move objects
-				moveList = new List<Move>();
-
+				//convert move bits to move objects
 				while (moves != 0)
 				{
 					int lsbitMove = BitboardController.GetLSBitIndex(moves);
@@ -177,7 +170,7 @@ namespace Chess.BoardManager
 					//add a special case for en passant captures
 					if (piece == Piece.Pawn && (Sq)lsbitMove == enPassSq)
 					{
-						moveList.Add(new Move((Sq)lsbit, (Sq)lsbitMove, piece, true));
+						allMoves.Add(new Move((Sq)lsbit, (Sq)lsbitMove, piece, true));
 						moves = BitboardController.PopBit(moves, lsbitMove);
 						continue;
 					}
@@ -186,28 +179,24 @@ namespace Chess.BoardManager
 					Piece takePiece = FindPieceOnSquare((Sq)lsbitMove, (Player)opponent);
 
 					//check for pawn promotions and add all 4 if possible
-					ulong rank = (player == Player.White) ? BitboardController.eighthRank : BitboardController.firstRank;
 					if (piece == Piece.Pawn && BitboardController.GetBit(rank, lsbitMove) > 0)
 					{
 						for (int promotionPiece = (int)Piece.Knight; promotionPiece <= (int)Piece.Queen; promotionPiece++)
-							moveDic[(Sq)lsbit].Add(new Move((Sq)lsbit, (Sq)lsbitMove, piece, takePiece, (Piece)promotionPiece));
+							allMoves.Add(new Move((Sq)lsbit, (Sq)lsbitMove, piece, takePiece, (Piece)promotionPiece));
 
 						moves = BitboardController.PopBit(moves, lsbit);
 						continue;
 					}
 
-					moveList.Add(new Move((Sq)lsbit, (Sq)lsbitMove, piece, takePiece));
+					allMoves.Add(new Move((Sq)lsbit, (Sq)lsbitMove, piece, takePiece));
 
 					moves = BitboardController.PopBit(moves, lsbitMove);
 				}
 
-				//add moves to the dictionary
-				moveDic.Add((Sq)lsbit, moveList);
-
 				pieces = BitboardController.PopBit(pieces, lsbit);
 			}
 
-			return moveDic;
+			return allMoves;
 		}
 
 		public Piece FindPieceOnSquare(Sq square, Player player)
@@ -225,44 +214,23 @@ namespace Chess.BoardManager
 			return Piece.None;
 		}
 
-		public Dictionary<Sq, List<Move>> GetMoveDictionary(Player player, Sq enPassSq, Castle castle)
+		public List<Move> GetMoveDictionary(Player player, Sq enPassSq, Castle castle)
 		{
-			Dictionary<Sq, List<Move>> moveDic = new Dictionary<Sq, List<Move>>();
+			List<Move> allMoves = new List<Move>();
 			ulong occupancy = occBitboards[0] | occBitboards[1];
 
-			//generate moves based on attack tables
-			Dictionary<Sq, List<Move>> pieceMoveDic;
-
-			pieceMoveDic = GetPieceMoves(Piece.Pawn, player, enPassSq);
-			foreach (var kvp in pieceMoveDic)
-				moveDic.Add(kvp.Key, kvp.Value);
-
-			pieceMoveDic = GetPieceMoves(Piece.Knight, player, enPassSq);
-			foreach (var kvp in pieceMoveDic)
-				moveDic.Add(kvp.Key, kvp.Value);
-
-			pieceMoveDic = GetPieceMoves(Piece.Bishop, player, enPassSq);
-			foreach (var kvp in pieceMoveDic)
-				moveDic.Add(kvp.Key, kvp.Value);
-
-			pieceMoveDic = GetPieceMoves(Piece.Rook, player, enPassSq);
-			foreach (var kvp in pieceMoveDic)
-				moveDic.Add(kvp.Key, kvp.Value);
-
-			pieceMoveDic = GetPieceMoves(Piece.Queen, player, enPassSq);
-			foreach (var kvp in pieceMoveDic)
-				moveDic.Add(kvp.Key, kvp.Value);
-
-			pieceMoveDic = GetPieceMoves(Piece.King, player, enPassSq);
-			foreach (var kvp in pieceMoveDic)
-				moveDic.Add(kvp.Key, kvp.Value);
-
+			allMoves.AddRange(GetPieceMoves(Piece.Pawn, player, enPassSq));
+			allMoves.AddRange(GetPieceMoves(Piece.Knight, player, enPassSq));
+			allMoves.AddRange(GetPieceMoves(Piece.Bishop, player, enPassSq));
+			allMoves.AddRange(GetPieceMoves(Piece.Rook, player, enPassSq));
+			allMoves.AddRange(GetPieceMoves(Piece.Queen, player, enPassSq));
+			allMoves.AddRange(GetPieceMoves(Piece.King, player, enPassSq));
 
 			//get pawn push moves
 			ulong pieces = GetBitboard(Piece.Pawn, player);
 			int lsbit;
 
-			//get moves for each pawn on board using least significant bit, then popping that bit
+			//get push moves for each pawn on board using least significant bit, then popping that bit
 			while (pieces != 0)
 			{
 				lsbit = BitboardController.GetLSBitIndex(pieces);
@@ -281,14 +249,14 @@ namespace Chess.BoardManager
 				if (BitboardController.GetBit(rank, possibleMove) > 0)
 				{
 					for (int promotionPiece = (int)Piece.Knight; promotionPiece <= (int)Piece.Queen; promotionPiece++)
-						moveDic[(Sq)lsbit].Add(new Move((Sq)lsbit, (Sq)possibleMove, Piece.Pawn, Piece.None, (Piece)promotionPiece));
+						allMoves.Add(new Move((Sq)lsbit, (Sq)possibleMove, Piece.Pawn, Piece.None, (Piece)promotionPiece));
 
 					pieces = BitboardController.PopBit(pieces, lsbit);
 					continue;
 				}
 
 				//otherwise add the single push without a promotion flag
-				moveDic[(Sq)lsbit].Add(new Move((Sq)lsbit, (Sq)possibleMove, Piece.Pawn));
+				allMoves.Add(new Move((Sq)lsbit, (Sq)possibleMove, Piece.Pawn));
 
 				//check 2 square push
 				possibleMove = (player == Player.White) ? (lsbit - 16) : (lsbit + 16);
@@ -296,7 +264,7 @@ namespace Chess.BoardManager
 
 				//if the pawn is on its starting square and nothing is on the destination square, add a 2 space move (nothing will be on the square directly in front)
 				if ((BitboardController.GetBit(rank, lsbit) > 0) && !(BitboardController.GetBit(occupancy, possibleMove) > 0))
-					moveDic[(Sq)lsbit].Add(new Move((Sq)lsbit, (Sq)possibleMove, Piece.Pawn));
+					allMoves.Add(new Move((Sq)lsbit, (Sq)possibleMove, Piece.Pawn));
 
 				pieces = BitboardController.PopBit(pieces, lsbit);
 			}
@@ -316,7 +284,7 @@ namespace Chess.BoardManager
 					bool isPieceBlocking = BitboardController.GetBit(occupancy, lsbit + 1) > 0 || BitboardController.GetBit(occupancy, possibleMove) > 0;
 					bool isEnemyGuarding = BitboardController.GetBit(attacks, lsbit + 1) > 0 || BitboardController.GetBit(attacks, possibleMove) > 0;
 					if (!isPieceBlocking && !isEnemyGuarding && !IsInCheck(player))
-						moveDic[(Sq)lsbit].Add(new Move((Sq)lsbit, (Sq)possibleMove, Piece.King, Castle.WhiteCastle));
+						allMoves.Add(new Move((Sq)lsbit, (Sq)possibleMove, Piece.King, Castle.WhiteCastle));
 				}
 
 				//make sure the flag is still set
@@ -327,7 +295,7 @@ namespace Chess.BoardManager
 					bool isPieceBlocking = BitboardController.GetBit(occupancy, lsbit - 1) > 0 || BitboardController.GetBit(occupancy, possibleMove) > 0;
 					bool isEnemyGuarding = BitboardController.GetBit(attacks, lsbit - 1) > 0 || BitboardController.GetBit(attacks, possibleMove) > 0;
 					if (!isPieceBlocking && !isEnemyGuarding && !IsInCheck(player))
-						moveDic[(Sq)lsbit].Add(new Move((Sq)lsbit, (Sq)possibleMove, Piece.King, Castle.WhiteQueenCastle));
+						allMoves.Add(new Move((Sq)lsbit, (Sq)possibleMove, Piece.King, Castle.WhiteQueenCastle));
 				}
 			}
 			else
@@ -340,7 +308,7 @@ namespace Chess.BoardManager
 					bool isPieceBlocking = BitboardController.GetBit(occupancy, lsbit + 1) > 0 || BitboardController.GetBit(occupancy, possibleMove) > 0;
 					bool isEnemyGuarding = BitboardController.GetBit(attacks, lsbit + 1) > 0 || BitboardController.GetBit(attacks, possibleMove) > 0;
 					if (!isPieceBlocking && !isEnemyGuarding && !IsInCheck(player))
-						moveDic[(Sq)lsbit].Add(new Move((Sq)lsbit, (Sq)possibleMove, Piece.King, Castle.BlackCastle));
+						allMoves.Add(new Move((Sq)lsbit, (Sq)possibleMove, Piece.King, Castle.BlackCastle));
 				}
 
 				//make sure the flag is still set
@@ -351,7 +319,7 @@ namespace Chess.BoardManager
 					bool isPieceBlocking = BitboardController.GetBit(occupancy, lsbit - 1) > 0 || BitboardController.GetBit(occupancy, possibleMove) > 0;
 					bool isEnemyGuarding = BitboardController.GetBit(attacks, lsbit - 1) > 0 || BitboardController.GetBit(attacks, possibleMove) > 0;
 					if (!isPieceBlocking && !isEnemyGuarding && !IsInCheck(player))
-						moveDic[(Sq)lsbit].Add(new Move((Sq)lsbit, (Sq)possibleMove, Piece.King, Castle.BlackQueenCastle));
+						allMoves.Add(new Move((Sq)lsbit, (Sq)possibleMove, Piece.King, Castle.BlackQueenCastle));
 				}
 			}
 
@@ -366,7 +334,7 @@ namespace Chess.BoardManager
 			// 	pieces = BitboardController.PopBit(pieces, lsbit);
 			// }
 
-			return moveDic;
+			return allMoves;
 		}
 
 		public void MoveBits(Piece movePiece, Piece takePiece, Player player, Player opp, Sq start, Sq end)
