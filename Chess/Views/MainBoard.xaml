@@ -1,0 +1,46 @@
+﻿<UserControl x:Class="Chess.Views.MainBoard"
+     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+     xmlns:local="clr-namespace:Chess.Views"
+     xmlns:boardman="clr-namespace:Chess.BoardManager"
+     mc:Ignorable="d" Height="800" Width="800">
+     <Grid x:Name="mainGrid">
+          <Grid.LayoutTransform>
+               <ScaleTransform ScaleX="100" ScaleY="100"/>
+          </Grid.LayoutTransform>
+          <ItemsControl x:Name="ChessBoard" 
+                        MinHeight="8" MinWidth="8"  
+                        ItemsSource="{Binding BoardState}"
+                        AllowDrop="True">
+               <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                         <Canvas x:Name="BoardCanvas"
+                                 Width="8" Height="8" 
+                                 Background="{StaticResource Board}" 
+                                 AllowDrop="True" 
+                                 Drop="DropHandler"
+                                 DragOver="DragOverHandler">
+                         </Canvas>
+                    </ItemsPanelTemplate>
+               </ItemsControl.ItemsPanel>
+               <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                         <Border Style="{StaticResource CellBorder}" Width="1" Height="1" MouseLeftButtonDown="MouseButtonDown">
+                              <Grid Width="0.8" Height="0.8">
+                                   <Image Style="{StaticResource ChessPieceStyle}" />
+                              </Grid>
+                         </Border>
+                    </DataTemplate>
+               </ItemsControl.ItemTemplate>
+               <ItemsControl.ItemContainerStyle>
+                    <Style TargetType="{x:Type ContentPresenter}">
+                         <EventSetter Event="MouseMove" Handler="MouseMoveHandle" />
+                         <Setter Property="Canvas.Left" Value="{Binding Pos.X, Mode=TwoWay}" />
+                         <Setter Property="Canvas.Top" Value="{Binding Pos.Y, Mode=TwoWay}" />
+                    </Style>
+               </ItemsControl.ItemContainerStyle>
+          </ItemsControl>
+     </Grid>
+</UserControl>

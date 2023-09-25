@@ -1,0 +1,42 @@
+﻿<Window x:Class="Chess.Views.PromotionDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:Chess.Views"
+        mc:Ignorable="d"
+        Title="PromotionDialog" Height="450" Width="100"
+        WindowStartupLocation="CenterOwner"
+        ResizeMode="NoResize"
+        ShowInTaskbar="False"
+        FocusManager.FocusedElement="{Binding ElementName=ChessBoard}"
+        Margin="0">
+     <Grid Background="DarkSlateGray">
+          <Grid.RowDefinitions>
+               <RowDefinition Height="100"/>
+               <RowDefinition Height="100"/>
+               <RowDefinition Height="100"/>
+               <RowDefinition Height="100"/>
+          </Grid.RowDefinitions>
+          <Border Grid.Row="0" Style="{StaticResource CellBorder}" MouseLeftButtonDown="PromoteKnight" BorderThickness="0" Height="100" Width="100">
+               <Grid>
+                    <Image Source="{StaticResource whiteKnightImage}"></Image>
+               </Grid>
+          </Border>
+          <Border Grid.Row="1" Style="{StaticResource CellBorder}" MouseLeftButtonDown="PromoteBishop" BorderThickness="0" Height="100" Width="100">
+               <Grid>
+                    <Image Source="{StaticResource whiteBishopImage}"></Image>
+               </Grid>
+          </Border>
+          <Border Grid.Row="2" Style="{StaticResource CellBorder}" MouseLeftButtonDown="PromoteRook" BorderThickness="0" Height="100" Width="100">
+               <Grid>
+                    <Image Source="{StaticResource whiteRookImage}"></Image>
+               </Grid>
+          </Border>
+          <Border Grid.Row="3" Style="{StaticResource CellBorder}" MouseLeftButtonDown="PromoteQueen" BorderThickness="0" Height="100" Width="100">
+               <Grid>
+                    <Image Source="{StaticResource whiteQueenImage}"></Image>
+               </Grid>
+          </Border>
+     </Grid>
+</Window>
