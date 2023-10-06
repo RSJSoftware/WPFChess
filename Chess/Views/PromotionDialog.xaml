@@ -11,7 +11,7 @@
         ShowInTaskbar="False"
         FocusManager.FocusedElement="{Binding ElementName=ChessBoard}"
         Margin="0">
-     <Grid Background="DarkSlateGray">
+     <Grid Background="{StaticResource backgroundColor}">
           <Grid.RowDefinitions>
                <RowDefinition Height="100"/>
                <RowDefinition Height="100"/>

@@ -6,24 +6,31 @@
         xmlns:views="clr-namespace:Chess.Views"
         mc:Ignorable="d"
         Title="Chess" 
-        Height="975" Width="1050" 
+        Height="1000" Width="1100" 
         WindowStartupLocation="CenterScreen" 
         ResizeMode="NoResize" 
-        WindowStyle="ToolWindow">
-     <Grid Background="#1B2430">
-          <views:MainBoard Grid.Row="0" />
-          <Label Content="{Binding Path=Debug}" Foreground="White" FontSize="20" Grid.Row="1"/>
-          <Button Content="Debug" Grid.Row="2" Click="Button_Click"/>
-          <TextBox Name="TextInput" Grid.Row="2" Grid.Column="1" />
-          <views:DebugMenu Grid.Row="0" Grid.Column="1"/>
+        WindowStyle="ToolWindow" 
+        Background="{StaticResource backgroundColor}">
+     <Grid Margin="0, 5, 0, 0">
+          <TabControl Grid.Row="0" Grid.Column="1" Background="{StaticResource backgroundColor}">
+               <TabItem Header="Game">
+                    <views:MoveListView HorizontalContentAlignment="Center"/>
+               </TabItem>
+               <TabItem Header="Setup">
+                    <views:BoardSetupControl HorizontalContentAlignment="Center"/>
+               </TabItem>
+               <TabItem Header="Debug">
+                    <views:DebugMenu HorizontalContentAlignment="Center"/>
+               </TabItem>
+
+          </TabControl>
+          <views:BoardControl Grid.Row="0" />
           <Grid.RowDefinitions>
-               <RowDefinition x:Name="BoardRow" Height="825"/>
-               <RowDefinition Height="50"/>
-               <RowDefinition />
+               <RowDefinition x:Name="BoardRow" Height="950"/>
           </Grid.RowDefinitions>
           <Grid.ColumnDefinitions>
-               <ColumnDefinition Width="825"/>
-               <ColumnDefinition Width="200"/>
+               <ColumnDefinition Width="850"/>
+               <ColumnDefinition Width="225"/>
           </Grid.ColumnDefinitions>
      </Grid>
 </Window>

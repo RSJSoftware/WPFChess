@@ -1,0 +1,35 @@
+﻿<Window x:Class="Chess.Views.GameOverDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:Chess.Views"
+        mc:Ignorable="d"
+        Title="GameOverDialog" Height="200" Width="400"
+        WindowStartupLocation="CenterOwner"
+        ResizeMode="NoResize"
+        ShowInTaskbar="False"
+        FocusManager.FocusedElement="{Binding ElementName=ChessBoard}"
+        Margin="0">
+    <Grid Background="{StaticResource backgroundColor}">
+          <Label Content="{Binding Path=GameWinner}"
+                 Grid.Row="0" Grid.ColumnSpan="2"
+                 Foreground="{StaticResource foregroundColor}" />
+
+          <Button x:Name="cancel" Grid.Row="1"
+                  Height="50" Width="80"
+                  Click="Cancel">Cancel</Button>
+          <Button x:Name="newGame" Grid.Row="1" Grid.Column="1"
+                  Height="50" Width="80"
+                  Click="NewGame">New Game</Button>
+
+          <Grid.RowDefinitions>
+               <RowDefinition/>
+               <RowDefinition/>
+          </Grid.RowDefinitions>
+          <Grid.ColumnDefinitions>
+               <ColumnDefinition/>
+               <ColumnDefinition/>
+          </Grid.ColumnDefinitions>
+    </Grid>
+</Window>

@@ -1,0 +1,185 @@
+﻿<UserControl x:Class="Chess.Views.BoardSetupControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:Chess.Views"
+             mc:Ignorable="d" 
+             d:DesignHeight="825" d:DesignWidth="200">
+     <Grid>
+          <Label Foreground="{StaticResource foregroundColor}" Grid.Row="0">Select Color:</Label>
+
+          <RadioButton x:Name="btnWhite"
+                       Content="White" 
+                       GroupName="PlayerColor"
+                       Foreground="{StaticResource foregroundColor}"
+                       Grid.Row="1" Grid.Column="0" 
+                       Height="25" Width="75"
+                       IsChecked="True"/>
+          <RadioButton x:Name="btnBlack"
+                       Content="Black" 
+                       GroupName="PlayerColor"
+                       Foreground="{StaticResource foregroundColor}"
+                       Grid.Row="1" Grid.Column="1" 
+                       Height="25" Width="75"/>
+
+          <StackPanel Background="Black" Grid.Row="2" Grid.ColumnSpan="2" Height="1"/>
+
+          <Label Foreground="{StaticResource foregroundColor}" Grid.Row="3">Enter FEN:</Label>
+          <TextBox x:Name="FenTextBox" Grid.Row="4" Grid.ColumnSpan="2" Height="25"/>
+          <Button Content="Load" Grid.Row="5" Grid.Column="0" Height="25" Width="75" Click="Load"/>
+          <Button Content="Init Pos" Grid.Row="5" Grid.Column="1" Height="25" Width="75" Click="LoadInitialPos"/>
+
+          <StackPanel Background="Black" Grid.Row="6" Grid.ColumnSpan="2" Height="1"/>
+
+
+          <Label Foreground="{StaticResource foregroundColor}" Grid.Row="7">Select AI:</Label>
+
+          <ComboBox x:Name="BitboardComboBox" 
+                    Grid.Row="8" Grid.ColumnSpan="2" 
+                    Width="180" Height="25"
+                    SelectedValuePath="Content">
+               <ComboBoxItem x:Name="noAI" IsSelected="True">No AI</ComboBoxItem>
+               <ComboBoxItem x:Name="RandAI">Random AI</ComboBoxItem>
+          </ComboBox>
+
+          <StackPanel Background="Black" Grid.Row="9" Grid.ColumnSpan="2" Height="1"/>
+
+          <Label Foreground="{StaticResource foregroundColor}" Grid.Row="10" Grid.ColumnSpan="2">Manual Board Setup:</Label>
+
+          <StackPanel Grid.Row="11" Grid.Column="0">
+               <ToggleButton x:Name="whitePawn" 
+                             Height="75" Width="75"
+                             Background="Transparent"
+                             BorderThickness="0"
+                             Checked="HandleSelection"
+                             Unchecked="HandleDeselection">
+                    <Image Source="{StaticResource whitePawnImage}"/>
+               </ToggleButton>
+               <ToggleButton x:Name="whiteKnight" 
+                             Height="75" Width="75"
+                             Background="Transparent"
+                             BorderThickness="0"
+                             Checked="HandleSelection"
+                             Unchecked="HandleDeselection">
+                    <Image Source="{StaticResource whiteKnightImage}"/>
+               </ToggleButton>
+               <ToggleButton x:Name="whiteBishop" 
+                             Height="75" Width="75"
+                             Background="Transparent"
+                             BorderThickness="0"
+                             Checked="HandleSelection"
+                             Unchecked="HandleDeselection">
+                    <Image Source="{StaticResource whiteBishopImage}"/>
+               </ToggleButton>
+               <ToggleButton x:Name="whiteRook" 
+                             Height="75" Width="75"
+                             Background="Transparent"
+                             BorderThickness="0"
+                             Checked="HandleSelection"
+                             Unchecked="HandleDeselection">
+                    <Image Source="{StaticResource whiteRookImage}"/>
+               </ToggleButton>
+               <ToggleButton x:Name="whiteQueen" 
+                             Height="75" Width="75"
+                             Background="Transparent"
+                             BorderThickness="0"
+                             Checked="HandleSelection"
+                             Unchecked="HandleDeselection">
+                    <Image Source="{StaticResource whiteQueenImage}"/>
+               </ToggleButton>
+               <ToggleButton x:Name="whiteKing" 
+                             Height="75" Width="75"
+                             Background="Transparent"
+                             BorderThickness="0"
+                             Checked="HandleSelection"
+                             Unchecked="HandleDeselection">
+                    <Image Source="{StaticResource whiteKingImage}"/>
+               </ToggleButton>
+          </StackPanel>
+
+
+          <StackPanel Grid.Row="11" Grid.Column="1">
+               <ToggleButton x:Name="blackPawn" 
+                             Height="75" Width="75"
+                             Background="Transparent"
+                             BorderThickness="0"
+                             Checked="HandleSelection"
+                             Unchecked="HandleDeselection">
+                    <Image Source="{StaticResource blackPawnImage}"/>
+               </ToggleButton>
+               <ToggleButton x:Name="blackKnight" 
+                             Height="75" Width="75"
+                             Background="Transparent"
+                             BorderThickness="0"
+                             Checked="HandleSelection"
+                             Unchecked="HandleDeselection">
+                    <Image Source="{StaticResource blackKnightImage}"/>
+               </ToggleButton>
+               <ToggleButton x:Name="blackBishop" 
+                             Height="75" Width="75"
+                             Background="Transparent"
+                             BorderThickness="0"
+                             Checked="HandleSelection"
+                             Unchecked="HandleDeselection">
+                    <Image Source="{StaticResource blackBishopImage}"/>
+               </ToggleButton>
+               <ToggleButton x:Name="blackRook" 
+                             Height="75" Width="75"
+                             Background="Transparent"
+                             BorderThickness="0"
+                             Checked="HandleSelection"
+                             Unchecked="HandleDeselection">
+                    <Image Source="{StaticResource blackRookImage}"/>
+               </ToggleButton>
+               <ToggleButton x:Name="blackQueen" 
+                             Height="75" Width="75"
+                             Background="Transparent"
+                             BorderThickness="0"
+                             Checked="HandleSelection"
+                             Unchecked="HandleDeselection">
+                    <Image Source="{StaticResource blackQueenImage}"/>
+               </ToggleButton>
+               <ToggleButton x:Name="blackKing" 
+                             Height="75" Width="75"
+                             Background="Transparent"
+                             BorderThickness="0"
+                             Checked="HandleSelection"
+                             Unchecked="HandleDeselection">
+                    <Image Source="{StaticResource blackKingImage}"/>
+               </ToggleButton>
+          </StackPanel>
+          
+          <StackPanel Background="Black" Grid.Row="12" Grid.ColumnSpan="2" Height="1"/>
+
+          <Label Foreground="{StaticResource foregroundColor}" Grid.Row="13" Grid.ColumnSpan="2">Play from position/toggle setup:</Label>
+
+          <Button Content="Play" Grid.Row="14" Grid.Column="0" Height="25" Width="75" Click="Start"/>
+          <ToggleButton x:Name="SetupToggleBtn"  Content="Setup Mode" Grid.Row="14" Grid.Column="1" Height="25" Width="75" Click="SetupModeToggle"/>
+
+
+
+          <Grid.RowDefinitions>
+               <RowDefinition Height="25"/>
+               <RowDefinition Height="25"/>
+               <RowDefinition Height="5"/>
+               <RowDefinition Height="25"/>
+               <RowDefinition Height="40"/>
+               <RowDefinition Height="40"/>
+               <RowDefinition Height="5"/>
+               <RowDefinition Height="25"/>
+               <RowDefinition Height="40"/>
+               <RowDefinition Height="5"/>
+               <RowDefinition Height="25"/>
+               <RowDefinition Height="500"/>
+               <RowDefinition Height="5"/>
+               <RowDefinition Height="25"/>
+               <RowDefinition Height="40"/>
+          </Grid.RowDefinitions>
+          <Grid.ColumnDefinitions>
+               <ColumnDefinition Width=" 100"/>
+               <ColumnDefinition Width=" 100"/>
+          </Grid.ColumnDefinitions>
+
+     </Grid>
+</UserControl>

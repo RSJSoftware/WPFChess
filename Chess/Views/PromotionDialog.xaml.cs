@@ -26,26 +26,26 @@ namespace Chess.Views
 
           private void PromoteKnight(object sender, MouseButtonEventArgs e)
           {
-               VariableManager.SetPromotionPiece(Piece.Knight);
-               this.Close();
+               VariableManager.PromotionPiece = Piece.Knight;
+               Close();
           }
 
           private void PromoteBishop(object sender, MouseButtonEventArgs e)
           {
-               VariableManager.SetPromotionPiece(Piece.Bishop);
-               this.Close();
+               VariableManager.PromotionPiece = Piece.Bishop;
+               Close();
           }
 
           private void PromoteRook(object sender, MouseButtonEventArgs e)
           {
-               VariableManager.SetPromotionPiece(Piece.Rook);
-               this.Close();
+               VariableManager.PromotionPiece = Piece.Rook;
+               Close();
           }
 
           private void PromoteQueen(object sender, MouseButtonEventArgs e)
           {
-               VariableManager.SetPromotionPiece(Piece.Queen);
-               this.Close();
+               VariableManager.PromotionPiece = Piece.Queen;
+               Close();
           }
      }
 }

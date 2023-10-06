@@ -61,8 +61,8 @@
     <Reference Include="System.Numerics.Vectors, Version=4.1.4.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
       <HintPath>..\packages\System.Numerics.Vectors.4.5.0\lib\net46\System.Numerics.Vectors.dll</HintPath>
     </Reference>
-    <Reference Include="System.Runtime.CompilerServices.Unsafe, Version=4.0.4.1, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
-      <HintPath>..\packages\System.Runtime.CompilerServices.Unsafe.4.5.3\lib\net461\System.Runtime.CompilerServices.Unsafe.dll</HintPath>
+    <Reference Include="System.Runtime.CompilerServices.Unsafe, Version=6.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Runtime.CompilerServices.Unsafe.6.0.0\lib\net461\System.Runtime.CompilerServices.Unsafe.dll</HintPath>
     </Reference>
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Windows.Interactivity, Version=4.5.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
@@ -86,17 +86,31 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="AI\IChessAI.cs" />
+    <Compile Include="AI\RandomAI.cs" />
     <Compile Include="BoardManager\Bitboard.cs" />
     <Compile Include="BoardManager\BitboardController.cs" />
     <Compile Include="BoardManager\BitUtils.cs" />
-    <Compile Include="BoardManager\Cell.cs" />
-    <Compile Include="BoardManager\ChessUtil.cs" />
+    <Compile Include="ViewModels\Cell.cs" />
     <Compile Include="BoardManager\Enums.cs" />
     <Compile Include="BoardManager\Move.cs" />
     <Compile Include="Perft\Driver.cs" />
+    <Compile Include="ViewModels\MoveVM.cs" />
+    <Compile Include="Views\BoardControl.xaml.cs">
+      <DependentUpon>BoardControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\BoardSetupControl.xaml.cs">
+      <DependentUpon>BoardSetupControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\GameOverDialog.xaml.cs">
+      <DependentUpon>GameOverDialog.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Views\LabelManager.cs" />
     <Compile Include="Views\MainBoard.xaml.cs">
       <DependentUpon>MainBoard.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\MoveListView.xaml.cs">
+      <DependentUpon>MoveListView.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\PromotionDialog.xaml.cs">
       <DependentUpon>PromotionDialog.xaml</DependentUpon>
@@ -114,12 +128,28 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="BoardManager\BoardState.cs" />
-    <Compile Include="BoardManager\ChessPieceVM.cs" />
+    <Compile Include="ViewModels\ChessPieceVM.cs" />
     <Compile Include="MainWindow.xaml.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Page Include="Views\BoardControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\BoardSetupControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\GameOverDialog.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Views\MainBoard.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\MoveListView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -177,6 +207,18 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="UICommands\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Assets\backArrow.png" />
+    <Resource Include="Assets\beginningArrow.png" />
+    <Resource Include="Assets\endArrow.png" />
+    <Resource Include="Assets\forwardArrow.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Assets\flipBoardArrow.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Assets\newGameButton.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

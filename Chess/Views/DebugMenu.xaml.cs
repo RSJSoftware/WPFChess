@@ -1,19 +1,10 @@
 ﻿using Chess.BoardManager;
 using Chess.Perft;
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 
 namespace Chess.Views
 {
@@ -28,7 +19,7 @@ namespace Chess.Views
           {
                InitializeComponent();
 
-               lbman = VariableManager.GetLabelManager();
+               lbman = VariableManager.Labels;
                DataContext = lbman;
           }
 
@@ -51,13 +42,14 @@ namespace Chess.Views
 
           private void Load(object sender, RoutedEventArgs e)
           {
-               VariableManager.GetBoard().ReadFen(FenTextBox.Text);
+               //r2q3r/ppp1kBpp/2n5/4PQN1/8/2P5/P1PP2PP/R1B2RK1
+               VariableManager.Board.ReadFen(FenTextBox.Text);
                VariableManager.UpdateCells();
           }
 
           private void LoadInitialPos(object sender, RoutedEventArgs e)
           {
-               VariableManager.GetBoard().ReadFen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
+               VariableManager.Board.ReadFen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
                VariableManager.UpdateCells();
           }
 
@@ -69,7 +61,7 @@ namespace Chess.Views
                if (Int32.TryParse(PerftText.Text, out int depth))
                {
                     PerftErrorLabel.Visibility = Visibility.Hidden;
-                    Driver.PerftDriver(depth, VariableManager.GetBoard());
+                    Driver.PerftDriver(depth, VariableManager.Board);
                     lbman.PerftStats = $"mov: {Driver.nodes}\ncap: {Driver.captures}\nep: {Driver.enPassants}\n" +
                          $"cas: {Driver.castles}\npro: {Driver.promotions}\nche: {Driver.checks}\nmat: {Driver.checkmates}\ntime: {Driver.stopwatch.ElapsedMilliseconds}ms ";
 
@@ -84,7 +76,7 @@ namespace Chess.Views
 
           private void HandleHighlights()
           {
-               foreach (Cell c in VariableManager.GetCells())
+               foreach (Cell c in VariableManager.CellList)
                     c.IsChecking = false;
 
                for (int i = 0; i < highlights.Length; i++)
@@ -94,13 +86,13 @@ namespace Chess.Views
 
                     int piece = i % 6;
                     int player = i / 6;
-                    ulong bitboard = VariableManager.GetBoard().Board.GetBitboard((Piece)piece, (Player)player);
+                    ulong bitboard = VariableManager.Board.Board.GetBitboard((Piece)piece, (Player)player);
 
                     while (bitboard != 0)
                     {
                          int lsbit = BitboardController.GetLSBitIndex(bitboard);
 
-                         Cell cell = VariableManager.GetCells().Where(x => x.Name == (Sq)lsbit).FirstOrDefault();
+                         Cell cell = VariableManager.CellList.Where(x => x.Name == (Sq)lsbit).FirstOrDefault();
                          cell.IsChecking = true;
 
                          bitboard = BitboardController.PopBit(bitboard, lsbit);

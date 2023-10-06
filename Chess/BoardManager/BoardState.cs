@@ -15,10 +15,10 @@ namespace Chess.BoardManager
 		public Castle CastleRights { get; set; }
 		public int HalfMove { get; set; }
 		public int FullMove { get; set; }
-		public bool IsMate { get; set; }
 		public List<Move> LegalMoves { get; set; }
 		public Stack<BoardState> MoveHistory { get; set; }
 		public List<string> MoveList { get; set; }
+		public GameState State { get; set; }
 
 
 		public BoardState() : this(INITIALPOS)
@@ -28,11 +28,11 @@ namespace Chess.BoardManager
 		public BoardState(string fen)
 		{
 			Board = new Bitboard();
+			MoveHistory = new Stack<BoardState>();
+			MoveList = new List<string>();
 			ReadFen(fen);
 			LegalMoves = Board.GetMoveDictionary(Turn, EnPassantSquare, CastleRights);
-			MoveHistory = new Stack<BoardState>();
-			IsMate = CheckForMate();
-			MoveList = new List<string>();
+			State = CurrentState();
 		}
 
 		public BoardState(BoardState b)
@@ -143,6 +143,19 @@ namespace Chess.BoardManager
 					CastleRights ^= Castle.BlackQueenCastle;
 			}
 
+			//if a rook was taken, see if the castling rights need to be removed
+			if (takePiece == Piece.Rook && CastleRights != Castle.None)
+			{
+				if (Turn == Player.Black && move.End == Sq.h1 && CastleRights.HasFlag(Castle.WhiteCastle))
+					CastleRights ^= Castle.WhiteCastle;
+				else if (Turn == Player.Black && move.End == Sq.a1 && CastleRights.HasFlag(Castle.WhiteQueenCastle))
+					CastleRights ^= Castle.WhiteQueenCastle;
+				else if (Turn == Player.White && move.End == Sq.h8 && CastleRights.HasFlag(Castle.BlackCastle))
+					CastleRights ^= Castle.BlackCastle;
+				else if (Turn == Player.White && move.End == Sq.a8 && CastleRights.HasFlag(Castle.BlackQueenCastle))
+					CastleRights ^= Castle.BlackQueenCastle;
+			}
+
 			//change turns and calculate new moves
 			ChangeTurn();
 
@@ -152,11 +165,11 @@ namespace Chess.BoardManager
 			LegalMoves = Board.GetMoveDictionary(Turn, EnPassantSquare, CastleRights);
 
 			//check mate
-			IsMate = CheckForMate();
+			State = CurrentState();
 
 			if (moveName != "")
 			{
-				if (IsMate)
+				if (State == GameState.Checkmate)
 					moveName += "#";
 				else if (Board.IsInCheck(opponent))
 					moveName += "+";
@@ -185,9 +198,7 @@ namespace Chess.BoardManager
 
 			if (move == null)
 			{
-				Console.WriteLine("ERROR: Move " + start + "" + end + " Does not exist. Legal move bitboard:");
-
-				BitboardController.printBitboard(possibleMoves, (int)start);
+				Console.WriteLine("ERROR: Move " + start + "" + end + " Does not exist.");
 				return false;
 			}
 
@@ -196,6 +207,9 @@ namespace Chess.BoardManager
 
 		private string CheckOtherPieceMove(Piece movePiece, Sq start, Sq end)
 		{
+			//pawns don't have ambiguous move notation
+			if (movePiece == Piece.Pawn)
+				return "";
 			string otherPiece = "";
 			bool sameRank = false;
 			bool sameFile = false;
@@ -244,10 +258,13 @@ namespace Chess.BoardManager
 			moveName += canOtherMove;
 
 			//add an x if a piece is taken, and the start square if taken by a pawn
-			if (move.TakePiece != Piece.None)
-				moveName += "x";
-			else if (move.MovePiece == Piece.Pawn)
-				moveName += BitboardController.squareToCoord[(int)move.Start][0] + "x";
+			if (move.TakePiece != Piece.None || move.EnPassant)
+			{
+				if (move.MovePiece != Piece.Pawn)
+					moveName += "x";
+				else
+					moveName += BitboardController.squareToCoord[(int)move.Start][0] + "x";
+			}
 
 			//add the name of the end square
 			moveName += move.End;
@@ -263,7 +280,7 @@ namespace Chess.BoardManager
 			}
 
 			//add a # for mate and a + for a check
-			if (IsMate)
+			if (State == GameState.Checkmate)
 				moveName += "#";
 			else if (Board.IsInCheck(opponent))
 				moveName += "+";
@@ -317,14 +334,73 @@ namespace Chess.BoardManager
 				Turn = Player.White;
 		}
 
+		public GameState CurrentState()
+		{
+			//TODO add checks for draw by repetation
+
+			//if both sides have insufficient material, game state is a draw
+			if (Board.IsInsufficientMaterial(Player.White) && Board.IsInsufficientMaterial(Player.Black))
+				return GameState.Insufficient;
+
+			TestMoves();
+			//if there are still legal moves left the game state is either continuing playing or draw by a technicality
+			if (LegalMoves.Count > 0)
+			{
+				if (HalfMove > 100)
+					return GameState.MoveCount;
+			}
+			//otherwise it's checkmate if the king is in check or stalemate if the king is not in check
+			else
+			{
+				if (Board.IsInCheck(Turn))
+					return GameState.Checkmate;
+				else
+					return GameState.Stalemate;
+			}
+
+			return GameState.Playing;
+
+		}
+		//test all moves from the start square to find which are allowed or not for gui visualization
+		public void TestMoves()
+		{
+			Player opponent = (Turn == Player.White) ? Player.Black : Player.White;
+			List<bool> movesToRemove = new List<bool>();
+
+			//test all moves from the start square to find which are allowed or not for gui visualization
+			foreach (Move m in LegalMoves)
+			{
+				//save the current board state before starting move
+				MoveHistory.Push(new BoardState(this));
+				if (m.EnPassant)
+				{
+					//manually remove the pawn since it's not on its target square
+					if (Turn == Player.White) Board.RemovePiece(Piece.Pawn, opponent, (Sq)((int)m.End + 8));
+					else Board.RemovePiece(Piece.Pawn, opponent, (Sq)((int)m.End - 8));
+				}
+				Board.MoveBits(m.MovePiece, m.TakePiece, Turn, opponent, m.Start, m.End);
+				movesToRemove.Add(Board.IsInCheck(Turn));
+				UnmoveBits();
+			}
+
+			for (int i = movesToRemove.Count - 1; i >= 0; i--)
+			{
+				if (movesToRemove[i])
+					LegalMoves.RemoveAt(i);
+			}
+		}
+
 		public void ReadFen(string fen)
 		{
 			//regex pattern for a full FEN code including piece placement, side to move, castling ability, en passant target square, halfmove clock, and full move counter
-			string pattern = @"(^([1-8pnbrqk]{1,8}/){7}([1-8pnbrqk]{1,8}){1}(\s[w|b]{1})(\s(([-]{1})|([kq]{1,4})){1})((\s(([-]{1})|[a-h]{1}[1-8]{1})){1})((\s\d{1,3}){2})+$)";
-			Regex fenrg = new Regex(pattern, RegexOptions.IgnoreCase);
+			string basePattern = @"(^([1-8pnbrqk]{1,8}/){7}([1-8pnbrqk]{1,8}){1})";
+			string fullPattern = @"(^([1-8pnbrqk]{1,8}/){7}([1-8pnbrqk]{1,8}){1}(\s[w|b]{1})(\s(([-]{1})|([kq]{1,4})){1})((\s(([-]{1})|[a-h]{1}[1-8]{1})){1})((\s\d{1,3}){2})+$)";
 
-			//immediately return if the fen doesn't match the pattern
-			if (!fenrg.IsMatch(fen))
+			Regex basefenrg = new Regex(basePattern, RegexOptions.IgnoreCase);
+			Regex fullfenrg = new Regex(fullPattern, RegexOptions.IgnoreCase);
+
+			//immediately return if the fen doesn't match the base pattern
+			if (!basefenrg.IsMatch(fen))
 			{
 				Console.WriteLine("Invalid FEN pattern: " + fen);
 				return;
@@ -333,57 +409,78 @@ namespace Chess.BoardManager
 			//split fen into 6 parts
 			string[] parts = fen.Split(' ');
 
-			//perform simple checks to make sure nothing illegal is in the FEN
+			ReadBaseFen(parts[0]);
 
-			//1. make sure the piece placement part of the fen has only 2 kings
-			int whiteKing = CharCount(parts[0], 'K');
-			int blackKing = CharCount(parts[0], 'k');
-			if (whiteKing != 1 || blackKing != 1)
+			//if the passed fen was a full fen, parse the rest of it for variables
+			if (fullfenrg.IsMatch(fen))
 			{
-				Console.WriteLine("Invalid number of kings: " + parts[0]);
+				ReadPlayerFen(parts[1]);
+				ReadCastleFen(parts[2]);
+				ReadEnPassFen(parts[3]);
+				ReadMovesFen(parts[4], parts[5]);
+				LegalMoves = Board.GetMoveDictionary(Turn, EnPassantSquare, CastleRights);
+				MoveList.Clear();
+				MoveHistory.Clear();
+				State = CurrentState();
 				return;
 			}
 
-			//2. pattern check should have ruled out invalid turn input
+			//otherwise initialize all variables
+			Turn = Player.White;
+			EnPassantSquare = Sq.empty;
+			FullMove = 0;
+			HalfMove = 0;
 
-			//3. if there are still castling rights, make sure each character is used 0 or 1 times only
-			int whiteQueen = 0;
-			int blackQueen = 0;
-			if (!parts[2].Equals("-"))
+			//set default castle rights based on king and rook positions
+			CastleRights = Castle.None;
+			if (BitboardController.GetBit(Board.GetBitboard(Piece.King, Player.White), Sq.e1) > 0)
 			{
-				whiteKing = CharCount(parts[2], 'K');
-				blackKing = CharCount(parts[2], 'k');
-				whiteQueen = CharCount(parts[2], 'Q');
-				blackQueen = CharCount(parts[2], 'q');
-				if (whiteKing > 1 | blackKing > 1 | whiteQueen > 1 | blackQueen > 1)
+				if (BitboardController.GetBit(Board.GetBitboard(Piece.Rook, Player.White), Sq.a1) > 0)
 				{
-					Console.WriteLine("Invalid castling rights: " + parts[2]);
-					return;
+					CastleRights |= Castle.WhiteQueenCastle;
+				}
+				if (BitboardController.GetBit(Board.GetBitboard(Piece.Rook, Player.White), Sq.h1) > 0)
+				{
+					CastleRights |= Castle.WhiteCastle;
 				}
 			}
 
-			//4. pattern check should have ruled out invalid en passant target squares
-
-			//5. half move clock should not be greater than 100 (100 may be loaded to analyze the position) -- pattern check should ensure a positive int value
-			int halfMoveClock = Int32.Parse(parts[4]);
-			if (halfMoveClock > 100)
+			if (BitboardController.GetBit(Board.GetBitboard(Piece.King, Player.Black), Sq.e8) > 0)
 			{
-				Console.WriteLine("Invalid halfmove clock: " + halfMoveClock);
-				return;
+				if (BitboardController.GetBit(Board.GetBitboard(Piece.Rook, Player.Black), Sq.a8) > 0)
+				{
+					CastleRights |= Castle.BlackQueenCastle;
+				}
+				if (BitboardController.GetBit(Board.GetBitboard(Piece.Rook, Player.Black), Sq.h8) > 0)
+				{
+					CastleRights |= Castle.BlackCastle;
+				}
 			}
 
-			//6. make sure full move clock is more than 0 since initial position starts at 1 (note: longest chess game in history is 269 moves, so 4 digit check would be invalid)
-			int fullMoveClock = Int32.Parse(parts[5]);
-			if (fullMoveClock < 1)
+			//TODO add a board check for legal positions, if illegal, recursively call for an initial position
+
+			//get legal moves
+			LegalMoves = Board.GetMoveDictionary(Turn, EnPassantSquare, CastleRights);
+			MoveList.Clear();
+			MoveHistory.Clear();
+			State = CurrentState();
+		}
+
+		private void ReadBaseFen(string fen)
+		{
+			//1. make sure the piece placement part of the fen has only 2 kings
+			int whiteKing = CharCount(fen, 'K');
+			int blackKing = CharCount(fen, 'k');
+			if (whiteKing != 1 || blackKing != 1)
 			{
-				Console.WriteLine("Invalid fullmove clock: " + fullMoveClock);
+				Console.WriteLine("Invalid number of kings: " + fen);
 				return;
 			}
 
 			//split the piece placement part of the fen into 8 rows
-			string[] rows = parts[0].Split('/');
+			string[] rows = fen.Split('/');
 
-			int col = 0;
+			int col;
 
 			//Make sure all rows add up to 8 columns
 			foreach (string s in rows)
@@ -485,19 +582,74 @@ namespace Chess.BoardManager
 					}
 				}
 			}
+		}
+
+		private void ReadPlayerFen(string fen)
+		{
 
 			//find the active player
-			if (parts[1].Equals("w"))
+			if (fen.Equals("w"))
 				Turn = Player.White;
-			else if (parts[1].Equals("b"))
+			else if (fen.Equals("b"))
 				Turn = Player.Black;
 			else
+			{
 				//sanity check
-				Console.WriteLine("Invalid FEN at player: " + parts[1]);
+				Turn = Player.White;
+				Console.WriteLine("Invalid FEN at player: " + fen);
+			}
+		}
+
+		private void ReadCastleFen(string fen)
+		{
+
+			//if there are still castling rights, make sure each character is used 0 or 1 times only
+			int whiteKing = 0;
+			int blackKing = 0;
+			int whiteQueen = 0;
+			int blackQueen = 0;
+			if (!fen.Equals("-"))
+			{
+				whiteKing = CharCount(fen, 'K');
+				blackKing = CharCount(fen, 'k');
+				whiteQueen = CharCount(fen, 'Q');
+				blackQueen = CharCount(fen, 'q');
+				if (whiteKing > 1 | blackKing > 1 | whiteQueen > 1 | blackQueen > 1)
+				{
+					CastleRights = Castle.None;
+
+					//set default castle rights based on king and rook positions
+					if (BitboardController.GetBit(Board.GetBitboard(Piece.King, Player.White), Sq.e1) > 0)
+					{
+						if (BitboardController.GetBit(Board.GetBitboard(Piece.Rook, Player.White), Sq.a1) > 0)
+						{
+							CastleRights |= Castle.WhiteQueenCastle;
+						}
+						if (BitboardController.GetBit(Board.GetBitboard(Piece.Rook, Player.White), Sq.h1) > 0)
+						{
+							CastleRights |= Castle.WhiteCastle;
+						}
+					}
+
+					if (BitboardController.GetBit(Board.GetBitboard(Piece.King, Player.Black), Sq.e8) > 0)
+					{
+						if (BitboardController.GetBit(Board.GetBitboard(Piece.Rook, Player.Black), Sq.a8) > 0)
+						{
+							CastleRights |= Castle.BlackQueenCastle;
+						}
+						if (BitboardController.GetBit(Board.GetBitboard(Piece.Rook, Player.Black), Sq.h8) > 0)
+						{
+							CastleRights |= Castle.BlackCastle;
+						}
+					}
+					Console.WriteLine("Invalid castling rights: " + fen);
+					return;
+				}
+			}
 
 			//find castling rights, perform checks using previously defined variables if castling phrase is not '-'
 			CastleRights = Castle.None;
-			if (!parts[2].Equals("-"))
+			if (!fen.Equals("-"))
 			{
 				if (whiteKing > 0)
 					CastleRights |= Castle.WhiteCastle;
@@ -508,28 +660,49 @@ namespace Chess.BoardManager
 				if (blackQueen > 0)
 					CastleRights |= Castle.BlackQueenCastle;
 			}
+		}
 
+		private void ReadEnPassFen(string fen)
+		{
 			//find en passant square, set to none if phrase is '-'
-			if (parts[3].Equals("-"))
+			if (fen.Equals("-"))
 				EnPassantSquare = Sq.empty;
 			else
 			{
 				//check to make sure the enum exists and parse it into the en passant square
-				if (Enum.IsDefined(typeof(Sq), parts[3]))
-					EnPassantSquare = (Sq)Enum.Parse(typeof(Sq), parts[3]);
+				if (Enum.IsDefined(typeof(Sq), fen))
+					EnPassantSquare = (Sq)Enum.Parse(typeof(Sq), fen);
 				else
+				{
 					//sanity check
-					Console.WriteLine("Invalid en passant square: " + parts[3]);
+					EnPassantSquare = Sq.empty;
+					Console.WriteLine("Invalid en passant square: " + fen);
+				}
+			}
+		}
+
+		private void ReadMovesFen(string fen1, string fen2)
+		{
+			//half move clock should not be greater than 100 (100 may be loaded to analyze the position) -- pattern check should ensure a positive int value
+			int halfMoveClock = int.Parse(fen1);
+			if (halfMoveClock > 100)
+			{
+				halfMoveClock = 0;
+				Console.WriteLine("Invalid halfmove clock: " + halfMoveClock);
+			}
+
+
+			//make sure full move clock is more than 0 since initial position starts at 1 (note: longest chess game in history is 269 moves, so 4 digit check would be invalid)
+			int fullMoveClock = int.Parse(fen2);
+			if (fullMoveClock < 1)
+			{
+				fullMoveClock = 0;
+				Console.WriteLine("Invalid fullmove clock: " + fullMoveClock);
 			}
 
 			//set the move timers that were set earlier
 			HalfMove = halfMoveClock;
 			FullMove = fullMoveClock;
-
-			//TODO add a board check for legal positions, if illegal, recursively call for an initial position
-
-			//get legal moves
-			LegalMoves = Board.GetMoveDictionary(Turn, EnPassantSquare, CastleRights);
 		}
 
 		private int CharCount(string source, char target)
@@ -545,15 +718,6 @@ namespace Chess.BoardManager
 			return output;
 		}
 
-		public bool CheckForMate()
-		{
-			TestMoves();
-			if (LegalMoves.Count > 0)
-				return false;
-
-			return true;
-		}
-
 		public void PrintBoard()
 		{
 			Board.PrintBoard();
@@ -562,35 +726,6 @@ namespace Chess.BoardManager
 			Console.Write($"Castle  : {(CastleRights.HasFlag(Castle.WhiteCastle) ? 'K' : '-')} {(CastleRights.HasFlag(Castle.WhiteQueenCastle) ? 'Q' : '-')}");
 			Console.WriteLine($" {(CastleRights.HasFlag(Castle.BlackCastle) ? 'k' : '-')} {(CastleRights.HasFlag(Castle.BlackQueenCastle) ? 'q' : '-')}");
 			Console.WriteLine();
-		}
-
-		//test all moves from the start square to find which are allowed or not for gui visualization
-		public void TestMoves()
-		{
-			Player opponent = (Turn == Player.White) ? Player.Black : Player.White;
-			List<bool> movesToRemove = new List<bool>();
-
-			//test all moves from the start square to find which are allowed or not for gui visualization
-			foreach (Move m in LegalMoves)
-			{
-				//save the current board state before starting move
-				MoveHistory.Push(new BoardState(this));
-				if (m.EnPassant)
-				{
-					//manually remove the pawn since it's not on its target square
-					if (Turn == Player.White) Board.RemovePiece(Piece.Pawn, opponent, (Sq)((int)m.End + 8));
-					else Board.RemovePiece(Piece.Pawn, opponent, (Sq)((int)m.End - 8));
-				}
-				Board.MoveBits(m.MovePiece, m.TakePiece, Turn, opponent, m.Start, m.End);
-				movesToRemove.Add(Board.IsInCheck(Turn));
-				UnmoveBits();
-			}
-
-			for (int i = movesToRemove.Count - 1; i >= 0; i--)
-			{
-				if (movesToRemove[i])
-					LegalMoves.RemoveAt(i);
-			}
 		}
 
 		override

@@ -25,13 +25,10 @@ namespace Chess.Perft
 				return;
 			}
 
-			//calculate new moves to be checked (here so new moves are not calculated at the leaf nodes)
-			board.LegalMoves = board.Board.GetMoveDictionary(board.Turn, board.EnPassantSquare, board.CastleRights);
-
 			List<Move> moveList = new List<Move>(board.LegalMoves);
 			foreach (Move move in moveList)
 			{
-				if (!MovePiece(board, move))
+				if (!MovePiece(board, move, depth))
 					continue;
 				//string debugLine = $"mov: {Driver.nodes}, cap: {Driver.captures}, ep: {Driver.enPassants}, " +
 				//$"cas: {Driver.castles}, pro: {Driver.promotions}, che: {Driver.checks}, mat: {Driver.checkmates}, time: {Driver.stopwatch.ElapsedMilliseconds}ms ";
@@ -56,7 +53,7 @@ namespace Chess.Perft
 			foreach (Move move in moveList)
 			{
 				long currentNode = nodes;
-				if (!MovePiece(board, move))
+				if (!MovePiece(board, move, depth))
 					continue;
 				RecursiveDriver(depth - 1, board);
 				board.UnmoveBits();
@@ -66,7 +63,7 @@ namespace Chess.Perft
 		}
 
 		//special move function specficially for perft, does not create move names, increment clocks, or check for null promotion
-		private static bool MovePiece(BoardState board, Move move)
+		private static bool MovePiece(BoardState board, Move move, int depth)
 		{
 			board.MoveHistory.Push(new BoardState(board));
 
@@ -89,9 +86,13 @@ namespace Chess.Perft
 			if (board.Board.IsInCheck(board.Turn))
 			{
 				board.UnmoveBits();
-				//Console.WriteLine("ERROR: Move " + move + ": Leaves player in check.");
 				return false;
 			}
+
+			//if the depth ends here, do not handle any other housekeeping steps after this
+			if (depth == 1)
+				return true;
+
 			//check for pawn promotion in the move object
 			if (move.PromotePiece != Piece.None)
 			{
@@ -132,8 +133,23 @@ namespace Chess.Perft
 					board.CastleRights ^= Castle.BlackQueenCastle;
 			}
 
-			//change turns
+			//if a rook was taken, see if the castling rights need to be removed
+			if (takePiece == Piece.Rook && board.CastleRights != Castle.None)
+			{
+				if (board.Turn == Player.Black && move.End == Sq.h1 && board.CastleRights.HasFlag(Castle.WhiteCastle))
+					board.CastleRights ^= Castle.WhiteCastle;
+				else if (board.Turn == Player.Black && move.End == Sq.a1 && board.CastleRights.HasFlag(Castle.WhiteQueenCastle))
+					board.CastleRights ^= Castle.WhiteQueenCastle;
+				else if (board.Turn == Player.White && move.End == Sq.h8 && board.CastleRights.HasFlag(Castle.BlackCastle))
+					board.CastleRights ^= Castle.BlackCastle;
+				else if (board.Turn == Player.White && move.End == Sq.a8 && board.CastleRights.HasFlag(Castle.BlackQueenCastle))
+					board.CastleRights ^= Castle.BlackQueenCastle;
+			}
+
+			//change turns and calculate new moves
 			board.ChangeTurn();
+
+			board.LegalMoves = board.Board.GetMoveDictionary(board.Turn, board.EnPassantSquare, board.CastleRights);
 
 			return true;
 		}

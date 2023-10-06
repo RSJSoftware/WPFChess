@@ -46,4 +46,16 @@ namespace Chess
           BlackCastle = 4,
           BlackQueenCastle = 8
      }
+
+     public enum GameState
+     {
+          Playing = 0,
+          Checkmate = 1,
+
+          //draw states
+          Stalemate = 2,
+          Repetition = 3,
+          Insufficient = 4,
+          MoveCount = 5
+     }
 }

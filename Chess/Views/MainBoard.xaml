@@ -12,7 +12,6 @@
           </Grid.LayoutTransform>
           <ItemsControl x:Name="ChessBoard" 
                         MinHeight="8" MinWidth="8"  
-                        ItemsSource="{Binding BoardState}"
                         AllowDrop="True">
                <ItemsControl.ItemsPanel>
                     <ItemsPanelTemplate>
@@ -27,7 +26,10 @@
                </ItemsControl.ItemsPanel>
                <ItemsControl.ItemTemplate>
                     <DataTemplate>
-                         <Border Style="{StaticResource CellBorder}" Width="1" Height="1" MouseLeftButtonDown="MouseButtonDown">
+                         <Border Style="{StaticResource CellBorder}" 
+                                 Width="1" Height="1" 
+                                 MouseLeftButtonDown="MouseButtonDown"
+                                 MouseRightButtonDown="MouseButtonDown">
                               <Grid Width="0.8" Height="0.8">
                                    <Image Style="{StaticResource ChessPieceStyle}" />
                               </Grid>

@@ -11,14 +11,14 @@ namespace Chess.BoardManager
      {
           public static void HighlightBits(ulong bitboard)
           {
-               foreach(Cell c in VariableManager.GetCells())
+               foreach(Cell c in VariableManager.CellList)
                     c.IsChecking = false;
 
                while (bitboard != 0)
                {
                     int lsbit = BitboardController.GetLSBitIndex(bitboard);
 
-                    Cell cell = VariableManager.GetCells().Where(x => x.Name == (Sq)lsbit).FirstOrDefault();
+                    Cell cell = VariableManager.CellList.Where(x => x.Name == (Sq)lsbit).FirstOrDefault();
                     cell.IsChecking = true;
 
                     bitboard = BitboardController.PopBit(bitboard, lsbit);

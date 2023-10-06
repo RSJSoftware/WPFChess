@@ -9,12 +9,12 @@
                <DrawingBrush x:Key="Board" Stretch="None" TileMode="Tile" Viewport="0,0,2,2" ViewportUnits="Absolute">
                     <DrawingBrush.Drawing>
                          <DrawingGroup>
-                              <GeometryDrawing Brush="Tan">
+                              <GeometryDrawing Brush="Brown">
                                    <GeometryDrawing.Geometry>
                                         <RectangleGeometry Rect="0,0,2,2" />
                                    </GeometryDrawing.Geometry>
                               </GeometryDrawing>
-                              <GeometryDrawing Brush="Brown">
+                              <GeometryDrawing Brush="Tan">
                                    <GeometryDrawing.Geometry>
                                         <GeometryGroup>
                                              <RectangleGeometry Rect="0,0,1,1" />
@@ -27,10 +27,34 @@
                </DrawingBrush>
                <SolidColorBrush x:Key="blue" Color="Blue" Opacity="0.5"/>
                <SolidColorBrush x:Key="red" Color="Red" Opacity="0.5"/>
+               
+               <SolidColorBrush x:Key="backgroundColor" Color="#1B2430"/>
+               <SolidColorBrush x:Key="backgroundHighlightColor" Color="#425876"/>
+               <SolidColorBrush x:Key="backgroundSelectorColor" Color="#33445B"/>
+               <SolidColorBrush x:Key="foregroundColor" Color="#E5EAF0"/>
+               <SolidColorBrush x:Key="foregroundHighlightColor" Color="#D8E0E9"/>
+               
+               <BitmapImage x:Key="whitePawnImage" UriSource="Assets/whitePawn.png" />
                <BitmapImage x:Key="whiteKnightImage" UriSource="Assets/whiteKnight.png" />
                <BitmapImage x:Key="whiteBishopImage" UriSource="Assets/whiteBishop.png" />
                <BitmapImage x:Key="whiteRookImage" UriSource="Assets/whiteRook.png" />
                <BitmapImage x:Key="whiteQueenImage" UriSource="Assets/whiteQueen.png" />
+               <BitmapImage x:Key="whiteKingImage" UriSource="Assets/whiteKing.png" />
+               
+               <BitmapImage x:Key="blackPawnImage" UriSource="Assets/blackPawn.png" />
+               <BitmapImage x:Key="blackKnightImage" UriSource="Assets/blackKnight.png" />
+               <BitmapImage x:Key="blackBishopImage" UriSource="Assets/blackBishop.png" />
+               <BitmapImage x:Key="blackRookImage" UriSource="Assets/blackRook.png" />
+               <BitmapImage x:Key="blackQueenImage" UriSource="Assets/blackQueen.png" />
+               <BitmapImage x:Key="blackKingImage" UriSource="Assets/blackKing.png" />
+               
+               <BitmapImage x:Key="UIBeginningArrow" UriSource="Assets/beginningArrow.png" DecodePixelHeight="50" DecodePixelWidth="50" />
+               <BitmapImage x:Key="UIBackArrow" UriSource="Assets/backArrow.png" />
+               <BitmapImage x:Key="UIForwardArrow" UriSource="Assets/forwardArrow.png" />
+               <BitmapImage x:Key="UIEndArrow" UriSource="Assets/endArrow.png" />
+               <BitmapImage x:Key="UIFlipArrow" UriSource="Assets/flipBoardArrow.png" />
+               <BitmapImage x:Key="UINewGame" UriSource="Assets/newGameButton.png" />
+               
                <Style x:Key="ChessPieceStyle" TargetType="{x:Type Image}">
                     <Style.Triggers>
                          <MultiDataTrigger>
@@ -227,8 +251,8 @@
                               </MultiDataTrigger.Conditions>
                               <MultiDataTrigger.Setters>
                                    <Setter Property="BorderThickness" Value="0"/>
-                                   <Setter Property="Background" Value="GreenYellow"/>
-                                   <Setter Property="BorderBrush" Value="PaleVioletRed" />
+                                   <Setter Property="Background" Value="{StaticResource blue}"/>
+                                   <Setter Property="BorderBrush" Value="White" />
                                    <Setter Property="CornerRadius" Value="0.5" />
                               </MultiDataTrigger.Setters>
                          </MultiDataTrigger>
@@ -241,8 +265,8 @@
                               </MultiDataTrigger.Conditions>
                               <MultiDataTrigger.Setters>
                                    <Setter Property="BorderThickness" Value="0.03"/>
-                                   <Setter Property="Background" Value="GreenYellow"/>
-                                   <Setter Property="BorderBrush" Value="DarkGreen" />
+                                   <Setter Property="Background" Value="{StaticResource blue}"/>
+                                   <Setter Property="BorderBrush" Value="Transparent" />
                                    <Setter Property="CornerRadius" Value="0" />
                               </MultiDataTrigger.Setters>
                          </MultiDataTrigger>
@@ -286,6 +310,34 @@
                                    <Setter Property="BorderThickness" Value="0.03"/>
                                    <Setter Property="Background" Value="Purple"/>
                                    <Setter Property="BorderBrush" Value="DarkRed" />
+                              </MultiDataTrigger.Setters>
+                         </MultiDataTrigger>
+                         <MultiDataTrigger>
+                              <MultiDataTrigger.Conditions>
+                                   <Condition Binding="{Binding IsSelected}" Value="False"/>
+                                   <Condition  Binding="{Binding IsDragging}" Value="False"/>
+                                   <Condition  Binding="{Binding IsLegal}" Value="False"/>
+                                   <Condition Binding="{Binding IsHighlighted}" Value="True"/>
+                                   <Condition Binding="{Binding RelativeSource={RelativeSource Self}, Path=IsMouseOver}" Value="False"/>
+                              </MultiDataTrigger.Conditions>
+                              <MultiDataTrigger.Setters>
+                                   <Setter Property="BorderThickness" Value="0.03"/>
+                                   <Setter Property="Background" Value="{StaticResource red}"/>
+                                   <Setter Property="BorderBrush" Value="{StaticResource red}" />
+                              </MultiDataTrigger.Setters>
+                         </MultiDataTrigger>
+                         <MultiDataTrigger>
+                              <MultiDataTrigger.Conditions>
+                                   <Condition Binding="{Binding IsSelected}" Value="False"/>
+                                   <Condition  Binding="{Binding IsDragging}" Value="False"/>
+                                   <Condition  Binding="{Binding IsLegal}" Value="False"/>
+                                   <Condition Binding="{Binding IsHighlighted}" Value="True"/>
+                                   <Condition Binding="{Binding RelativeSource={RelativeSource Self}, Path=IsMouseOver}" Value="True"/>
+                              </MultiDataTrigger.Conditions>
+                              <MultiDataTrigger.Setters>
+                                   <Setter Property="BorderThickness" Value="0.03"/>
+                                   <Setter Property="Background" Value="{StaticResource red}"/>
+                                   <Setter Property="BorderBrush" Value="White" />
                               </MultiDataTrigger.Setters>
                          </MultiDataTrigger>
                     </Style.Triggers>
@@ -338,6 +390,114 @@
                               </MultiDataTrigger.Setters>
                          </MultiDataTrigger>
                     </Style.Triggers>
+               </Style>
+               <Style x:Key="BoardText" TargetType="{x:Type Label}">
+                    <Setter Property="HorizontalAlignment" Value="Center"/>
+                    <Setter Property="VerticalAlignment" Value="Center"/>
+                    <Setter Property="Foreground" Value="White"/>
+                    <Setter Property="FontSize" Value="12"/>
+               </Style>
+               <Style x:Key="DataGridStyle" TargetType="{x:Type DataGrid}">
+                    <Setter Property="Background" Value="{StaticResource backgroundColor}"/>
+                    <Setter Property="Foreground" Value="{StaticResource foregroundColor}"/>
+                    <Setter Property="Padding" Value="5"/>
+                    <Setter Property="GridLinesVisibility" Value="None"/>
+                    <Setter Property="HeadersVisibility" Value="None"/>
+                    <Setter Property="IsReadOnly" Value="True"/>
+                    <Setter Property="BorderBrush" Value="Transparent"/>
+                    <Setter Property="BorderThickness" Value="0"/>
+               </Style>
+               <Style x:Key="DataGridCellStyle" TargetType="{x:Type DataGridCell}">
+                    <Setter Property="Background" Value="{StaticResource backgroundColor}"/>
+                    <Setter Property="Foreground" Value="{StaticResource foregroundColor}"/>
+                    <Setter Property="BorderBrush" Value="Transparent"/>
+                    <Setter Property="BorderThickness" Value="0"/>
+                    <Setter Property="Padding" Value="5, 5, 0, 5"/>
+                    <Setter Property="Template">
+                         <Setter.Value>
+                              <ControlTemplate TargetType="{x:Type DataGridCell}">
+                                   <Border Padding="{TemplateBinding Padding}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" Background="{TemplateBinding Background}" SnapsToDevicePixels="True">
+                                        <ContentPresenter SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}"/>
+                                   </Border>
+                              </ControlTemplate>
+                         </Setter.Value>
+                    </Setter>
+                    <Style.Triggers>
+                         <MultiTrigger>
+                              <MultiTrigger.Conditions>
+                                   <Condition Property="IsSelected" Value="true" />
+                              </MultiTrigger.Conditions>
+                              <Setter Property="Background" Value="{StaticResource backgroundSelectorColor}" />
+                              <Setter Property="Foreground" Value="{StaticResource foregroundHighlightColor}" />
+                         </MultiTrigger>
+                         <MultiTrigger>
+                              <MultiTrigger.Conditions>
+                                   <Condition Property="IsMouseOver" Value="true" />
+                              </MultiTrigger.Conditions>
+                              <Setter Property="Background" Value="{StaticResource backgroundHighlightColor}" />
+                              <Setter Property="Foreground" Value="{StaticResource foregroundHighlightColor}" />
+                         </MultiTrigger>
+                    </Style.Triggers>
+               </Style>
+               <Style x:Key="DataGridCellNonSelectableStyle" TargetType="{x:Type DataGridCell}">
+                    <Setter Property="Background" Value="{StaticResource backgroundColor}"/>
+                    <Setter Property="Foreground" Value="{StaticResource foregroundColor}"/>
+                    <Setter Property="BorderBrush" Value="Transparent"/>
+                    <Setter Property="BorderThickness" Value="0"/>
+                    <Setter Property="Padding" Value="0, 5, 0, 5"/>
+                    <Setter Property="Template">
+                         <Setter.Value>
+                              <ControlTemplate TargetType="{x:Type DataGridCell}">
+                                   <Border Padding="{TemplateBinding Padding}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" Background="{TemplateBinding Background}" SnapsToDevicePixels="True">
+                                        <ContentPresenter SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}"/>
+                                   </Border>
+                              </ControlTemplate>
+                         </Setter.Value>
+                    </Setter>
+                    <Style.Triggers>
+                         <MultiTrigger>
+                              <MultiTrigger.Conditions>
+                                   <Condition Property="Selector.IsSelected" Value="true" />
+                              </MultiTrigger.Conditions>
+                              <Setter Property="Background" Value="{StaticResource backgroundColor}" />
+                              <Setter Property="Foreground" Value="{StaticResource foregroundColor}" />
+                         </MultiTrigger>
+                         <MultiTrigger>
+                              <MultiTrigger.Conditions>
+                                   <Condition Property="IsMouseOver" Value="true" />
+                              </MultiTrigger.Conditions>
+                              <Setter Property="Background" Value="{StaticResource backgroundColor}" />
+                              <Setter Property="Foreground" Value="{StaticResource foregroundColor}" />
+                         </MultiTrigger>
+                    </Style.Triggers>
+               </Style>
+
+               <Style x:Key="UIButton" TargetType="{x:Type Button}">
+                    <Setter Property="OverridesDefaultStyle" Value="True"/>
+                    <Setter Property="Margin" Value="5"/>
+                    <Setter Property="Template">
+                         <Setter.Value>
+                              <ControlTemplate TargetType="Button">
+                                   <Border Name="border" 
+                                            BorderThickness="0"
+                                            Padding="4,2" 
+                                            BorderBrush="Transparent" 
+                                            CornerRadius="3" 
+                                            Background="{TemplateBinding Background}"
+                                           Opacity="0.5">
+                                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                   </Border>
+                                   <ControlTemplate.Triggers>
+                                        <Trigger Property="IsMouseOver" Value="True">
+                                             <Setter TargetName="border" Property="Opacity" Value="1" />
+                                        </Trigger>
+                                        <Trigger Property="IsEnabled" Value="False">
+                                             <Setter TargetName="border" Property="Opacity" Value="0.2" />
+                                        </Trigger>
+                                   </ControlTemplate.Triggers>
+                              </ControlTemplate>
+                         </Setter.Value>
+                    </Setter>
                </Style>
           </ResourceDictionary>
      </Application.Resources>

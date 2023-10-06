@@ -1,9 +1,4 @@
 ﻿using GalaSoft.MvvmLight;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Chess.Views
 {
@@ -29,6 +24,20 @@ namespace Chess.Views
           {
                get { return this.perftMoves; }
                set { this.perftMoves = value; RaisePropertyChanged(() => this.PerftMoves); }
+          }
+
+          private string currentMove;
+          public string CurrentMove
+          {
+               get { return this.currentMove; }
+               set { this.currentMove = value; RaisePropertyChanged(() => this.CurrentMove); }
+          }
+
+          private string gameWinner;
+          public string GameWinner
+          {
+               get { return this.gameWinner; }
+               set { this.gameWinner = value; RaisePropertyChanged(() => this.GameWinner); }
           }
      }
 }

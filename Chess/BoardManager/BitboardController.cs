@@ -34,13 +34,13 @@ namespace Chess.BoardManager
 
 		public static ulong SetBit(ulong bitboard, Sq square)
 		{
-			return bitboard |= (1UL << (int)square);
+			return bitboard |= 1UL << (int)square;
 		}
 
 
 		public static ulong SetBit(ulong bitboard, int square)
 		{
-			return bitboard |= (1UL << square);
+			return bitboard |= 1UL << square;
 		}
 
 		public static ulong PopBit(ulong bitboard, Sq square)
@@ -48,7 +48,7 @@ namespace Chess.BoardManager
 			if (GetBit(bitboard, square) == 0)
 				return bitboard;
 
-			return bitboard ^= (1UL << (int)square);
+			return bitboard ^= 1UL << (int)square;
 		}
 
 		public static ulong PopBit(ulong bitboard, int square)
@@ -56,7 +56,7 @@ namespace Chess.BoardManager
 			if (GetBit(bitboard, square) == 0)
 				return bitboard;
 
-			return bitboard ^= (1UL << square);
+			return bitboard ^= 1UL << square;
 		}
 
 		public static int CountBit(ulong bitboard)

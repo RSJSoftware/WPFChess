@@ -146,14 +146,8 @@ namespace Chess.BoardManager
 				switch (piece)
 				{
 					case Piece.Pawn:
-						//add enPassant square if it exists and is within the pawn's line of sight
-						ulong enPassCheck = 0UL;
-						if (enPassSq != Sq.empty)
-						{
-							enPassCheck = BitboardController.SetBit(enPassCheck, enPassSq);
-							moves |= BitboardController.arrPawnAttacks[(int)player, lsbit] & enPassCheck;
-						}
-						moves |= BitboardController.arrPawnAttacks[(int)player, lsbit] & occBitboards[opponent];
+						//add enPassant square to the end of the pawn attack list
+						moves |= BitboardController.arrPawnAttacks[(int)player, lsbit] & (occBitboards[opponent] | (1UL << (int)enPassSq));
 						break;
 					case Piece.Knight: moves |= BitboardController.arrKnightAttacks[lsbit] & ~occBitboards[(int)player]; break;
 					case Piece.Bishop: moves |= BitboardController.GetBishopAttack(lsbit, occupancy) & ~occBitboards[(int)player]; break;
@@ -184,7 +178,7 @@ namespace Chess.BoardManager
 						for (int promotionPiece = (int)Piece.Knight; promotionPiece <= (int)Piece.Queen; promotionPiece++)
 							allMoves.Add(new Move((Sq)lsbit, (Sq)lsbitMove, piece, takePiece, (Piece)promotionPiece));
 
-						moves = BitboardController.PopBit(moves, lsbit);
+						moves = BitboardController.PopBit(moves, lsbitMove);
 						continue;
 					}
 
@@ -344,6 +338,43 @@ namespace Chess.BoardManager
 
 			SetPiece(movePiece, player, end);
 			RemovePiece(movePiece, player, start);
+		}
+
+		public bool IsInsufficientMaterial(Player player)
+		{
+			int count = BitboardController.CountBit(occBitboards[(int)player]);
+
+			//if there are more than 3 pieces, there is not a lack of materials (unless all pieces are bishops on same color, which is highly unlikely)
+			if (count > 3)
+				return false;
+
+			//if there is only a king, there is a lack of materials
+			if (count == 1)
+				return true;
+
+			//if there is only a king and one other piece that is not a pawn, rook, or queen, there is a lack of materials
+			if (count == 2 && (GetBitboard(Piece.Pawn, player) == 0 || GetBitboard(Piece.Rook, player) == 0 || GetBitboard(Piece.Queen, player) == 0))
+				return true;
+
+			//if there are 3 pieces and 2 of them are knights, there is a lack of materials
+			if (count == 3 && BitboardController.CountBit(GetBitboard(Piece.Knight, player)) == 2)
+				return true;
+
+			return false;
+		}
+
+		public bool Equals(Bitboard b)
+		{
+			for (int i = 0; i < 6; i++)
+				if (pieceBitboards[i] != b.pieceBitboards[i])
+					return false;
+
+
+			for (int i = 0; i < 2; i++)
+				if (occBitboards[i] != b.occBitboards[i])
+					return false;
+
+			return true;
 		}
 
 		public void PrintBoard()
