@@ -17,6 +17,7 @@ namespace Chess.Views
           public BoardSetupControl()
           {
                InitializeComponent();
+               DataContext = VariableManager.Labels;
                selectedButton = null;
           }
 
@@ -38,10 +39,11 @@ namespace Chess.Views
                     selectedButton.IsChecked = false;
 
                selectedButton = sender as ToggleButton;
+               VariableManager.IsTrash = false;
 
                if (!VariableManager.IsInSetupMode)
                {
-                    VariableManager.IsInSetupMode = true;
+                    VariableManager.ToggleSetUpMode();
                     SetupToggleBtn.IsChecked = true;
                }
 
@@ -59,6 +61,7 @@ namespace Chess.Views
                     case "blackRook": VariableManager.SetupPiece = Piece.Rook; VariableManager.SetupColor = Player.Black; break;
                     case "blackQueen": VariableManager.SetupPiece = Piece.Queen; VariableManager.SetupColor = Player.Black; break;
                     case "blackKing": VariableManager.SetupPiece = Piece.King; VariableManager.SetupColor = Player.Black; break;
+                    case "trash": VariableManager.SetupPiece = Piece.None; VariableManager.SetupColor = Player.White; VariableManager.IsTrash = true; break;
                     default: Console.WriteLine("togglebutton name incorrect."); break;
                }
           }
@@ -81,15 +84,15 @@ namespace Chess.Views
                     selectedButton = null;
                }
 
-               VariableManager.IsInSetupMode = false;
+               VariableManager.ToggleSetUpMode();
 
                //make sure all cells are in order
                for (int i = 0; i < 64; i++)
                {
                     if (VariableManager.CellList[i].Name != (Sq)i)
                     {
-                         Console.WriteLine("Cells out of order");
-                         return;
+                         Console.WriteLine("Cells out of order, sorting...");
+                         VariableManager.SortCells();
                     }
                }
 
@@ -192,9 +195,8 @@ namespace Chess.Views
 
           private void SetupModeToggle(object sender, RoutedEventArgs e)
           {
-               if (SetupToggleBtn.IsChecked == true)
-                    VariableManager.IsInSetupMode = true;
-               else
+               VariableManager.ToggleSetUpMode();
+               if (SetupToggleBtn.IsChecked != true)
                {
                     if (selectedButton != null)
                     {
@@ -202,7 +204,6 @@ namespace Chess.Views
                          selectedButton = null;
                     }
 
-                    VariableManager.IsInSetupMode = false;
                     VariableManager.UpdateCells();
                }
           }

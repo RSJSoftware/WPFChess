@@ -27,6 +27,7 @@
                </DrawingBrush>
                <SolidColorBrush x:Key="blue" Color="Blue" Opacity="0.5"/>
                <SolidColorBrush x:Key="red" Color="Red" Opacity="0.5"/>
+               <SolidColorBrush x:Key="white" Color="White" Opacity="0.3"/>
                
                <SolidColorBrush x:Key="backgroundColor" Color="#1B2430"/>
                <SolidColorBrush x:Key="backgroundHighlightColor" Color="#425876"/>
@@ -54,6 +55,7 @@
                <BitmapImage x:Key="UIEndArrow" UriSource="Assets/endArrow.png" />
                <BitmapImage x:Key="UIFlipArrow" UriSource="Assets/flipBoardArrow.png" />
                <BitmapImage x:Key="UINewGame" UriSource="Assets/newGameButton.png" />
+               <BitmapImage x:Key="UITrashCan" UriSource="Assets/trashIcon.png" />
                
                <Style x:Key="ChessPieceStyle" TargetType="{x:Type Image}">
                     <Style.Triggers>
@@ -337,6 +339,34 @@
                               <MultiDataTrigger.Setters>
                                    <Setter Property="BorderThickness" Value="0.03"/>
                                    <Setter Property="Background" Value="{StaticResource red}"/>
+                                   <Setter Property="BorderBrush" Value="White" />
+                              </MultiDataTrigger.Setters>
+                         </MultiDataTrigger>
+                         <MultiDataTrigger>
+                              <MultiDataTrigger.Conditions>
+                                   <Condition Binding="{Binding IsSelected}" Value="False"/>
+                                   <Condition  Binding="{Binding IsDragging}" Value="False"/>
+                                   <Condition  Binding="{Binding IsLegal}" Value="False"/>
+                                   <Condition Binding="{Binding IsSetUp}" Value="True"/>
+                                   <Condition Binding="{Binding RelativeSource={RelativeSource Self}, Path=IsMouseOver}" Value="False"/>
+                              </MultiDataTrigger.Conditions>
+                              <MultiDataTrigger.Setters>
+                                   <Setter Property="BorderThickness" Value="0.03"/>
+                                   <Setter Property="Background" Value="{StaticResource white}"/>
+                                   <Setter Property="BorderBrush" Value="{StaticResource white}" />
+                              </MultiDataTrigger.Setters>
+                         </MultiDataTrigger>
+                         <MultiDataTrigger>
+                              <MultiDataTrigger.Conditions>
+                                   <Condition Binding="{Binding IsSelected}" Value="False"/>
+                                   <Condition  Binding="{Binding IsDragging}" Value="False"/>
+                                   <Condition  Binding="{Binding IsLegal}" Value="False"/>
+                                   <Condition Binding="{Binding IsSetUp}" Value="True"/>
+                                   <Condition Binding="{Binding RelativeSource={RelativeSource Self}, Path=IsMouseOver}" Value="True"/>
+                              </MultiDataTrigger.Conditions>
+                              <MultiDataTrigger.Setters>
+                                   <Setter Property="BorderThickness" Value="0.03"/>
+                                   <Setter Property="Background" Value="{StaticResource white}"/>
                                    <Setter Property="BorderBrush" Value="White" />
                               </MultiDataTrigger.Setters>
                          </MultiDataTrigger>

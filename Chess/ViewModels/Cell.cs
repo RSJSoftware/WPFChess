@@ -82,6 +82,14 @@ namespace Chess.BoardManager
                set { this.isActivated = value; RaisePropertyChanged(() => this.IsActivated); }
           }
 
+          //activated when in setup mode
+          private bool isSetUp;
+          public bool IsSetUp
+          {
+               get { return this.isSetUp; }
+               set { this.isSetUp = value; RaisePropertyChanged(() => this.IsSetUp); }
+          }
+
 
           override
           public string ToString()

@@ -48,17 +48,19 @@ namespace Chess.Views
 					return;
 				}
 
-				if (VariableManager.IsInSetupMode)
+				//if in setup mode with a setup piece selected, simply set the piece and return
+				if (VariableManager.IsInSetupMode && (VariableManager.SetupPiece != Piece.None || VariableManager.IsTrash))
 				{
 					VariableManager.SetCell(frameworkElement.DataContext as Cell);
 					return;
 				}
+
 				//handle selection in the handles selection class
 				SelectionHandler(frameworkElement.DataContext as Cell);
 
 				Console.WriteLine("Mouse clicked on cell: " + frameworkElement.DataContext);
 			}
-			else if (e.RightButton == MouseButtonState.Pressed && sender is FrameworkElement frameworkElement2)
+			else if (e.RightButton == MouseButtonState.Pressed && sender is FrameworkElement frameworkElement2 && !VariableManager.IsInSetupMode)
 			{
 				//right click will highlight the cell
 				Cell clickedCell = frameworkElement2.DataContext as Cell;
@@ -77,28 +79,31 @@ namespace Chess.Views
 
 		private void DropHandler(object sender, DragEventArgs e)
 		{
-			if (VariableManager.SelectedCell == null)
+			if (VariableManager.SelectedCell == null || (VariableManager.IsInSetupMode && (VariableManager.SetupPiece != Piece.None || VariableManager.IsTrash)))
 				return;
 
 			Point newPos = e.GetPosition(this);
+
 			//fix the dragging point since it takes into consideration the whole canvas
 			if (newPos.X > 8 || newPos.Y > 8)
 			{
 				newPos.X /= scaleSize;
 				newPos.Y /= scaleSize;
-			}
+
+                    //center the image to the cell
+                    newPos.X -= newPos.X % cellSize;
+                    newPos.Y -= newPos.Y % cellSize;
+               }
 
 			Console.WriteLine("Dropping at newPos: " + newPos);
-			if (newPos != VariableManager.SelectedCell.Pos)
-				MovePiece(newPos);
 
+			MovePiece(newPos);
 
 			Console.WriteLine("Dropped at newPos: " + newPos);
 		}
 
 		private void DragOverHandler(object sender, DragEventArgs e)
 		{
-			//don't allow cell selection when browsing previous moves
 			if (VariableManager.SelectedCell == null)
 				return;
 
@@ -127,9 +132,21 @@ namespace Chess.Views
 
 		private void SelectionHandler(Cell cell)
 		{
-			//don't allow selection if browsing past moves or the gamestate is not playing
-			if (VariableManager.CurrentMove != VariableManager.MoveHistory.Count - 1 || VariableManager.State != GameState.Playing)
+			//don't allow selection if there is no piece in cell, browsing past moves, or the gamestate is not playing
+			if (cell.ChessPiece == null || VariableManager.CurrentMove != VariableManager.MoveHistory.Count - 1 || VariableManager.State != GameState.Playing)
 				return;
+
+               //if in setup mode select any piece in order to allow drag and drop
+               if (VariableManager.IsInSetupMode)
+			{
+				if(VariableManager.SelectedCell != null)
+                         VariableManager.MoveCell(VariableManager.CellList.Count - 1, index);
+				VariableManager.SelectedCell = cell;
+                    VariableManager.InitialPos = cell.Pos;
+                    index = (int)cell.Name;
+                    VariableManager.MoveCell(index, VariableManager.CellList.Count - 1);
+                    return;
+			}
 
                //deselect if selected cell is the cell being passed
                if (VariableManager.SelectedCell != null && cell.Equals(VariableManager.SelectedCell))
@@ -142,9 +159,6 @@ namespace Chess.Views
 
 				return;
 			}
-			//return if attempting to select a cell without a piece
-			if (cell.ChessPiece == null)
-				return;
 
 			//if selected cell is not null and the new cell is an enemy piece, move
 			if (VariableManager.SelectedCell != null && cell.ChessPiece.Player != VariableManager.SelectedCell.ChessPiece.Player)
@@ -192,23 +206,39 @@ namespace Chess.Views
 			if (VariableManager.SelectedCell == null)
 				return;
 
-			//center the image to the cell
-			pos.X -= pos.X % cellSize;
-			pos.Y -= pos.Y % cellSize;
 
-			Console.WriteLine("Starting pos: " + VariableManager.InitialPos + " " + VariableManager.SelectedCell.Name);
+			Console.WriteLine("Starting pos: " + VariableManager.InitialPos + " " + VariableManager.SelectedCell.Name + " to " + pos);
 
 			Cell end = VariableManager.CellList.Where(x => x.Pos == pos).FirstOrDefault();
+
+			Piece takePiece = Piece.None;
 
 			//move piece back to original index before any calculations begin
 			bool moved = false;
 			VariableManager.MoveCell(VariableManager.CellList.Count - 1, index);
 
+               //if in setup mode move the piece to any position without legality checks
+               if (VariableManager.IsInSetupMode)
+			{
+				if (end != null)
+                    {
+                         end.ChessPiece.Type = VariableManager.SelectedCell.ChessPiece.Type;
+                         end.ChessPiece.Player = VariableManager.SelectedCell.ChessPiece.Player;
+                         VariableManager.SelectedCell.ChessPiece.Type = Piece.None;
+                    }
+
+                    VariableManager.SelectedCell.Pos = VariableManager.InitialPos;
+                    VariableManager.SelectedCell.IsDragging = false;
+                    return;
+               }
+
 			Player mover = VariableManager.Board.Turn;
 
 			if (end != null)
 			{
-				ChessPieceVM selectedPiece = VariableManager.SelectedCell.ChessPiece;
+				takePiece = end.ChessPiece.Type;
+
+                    ChessPieceVM selectedPiece = VariableManager.SelectedCell.ChessPiece;
 
                     if (selectedPiece.Type == Piece.Pawn && 
 					(((VariableManager.IsBoardFlipped && selectedPiece.Player == Player.Black) || 
@@ -228,22 +258,17 @@ namespace Chess.Views
 				VariableManager.PromotionPiece = Piece.None;
 			}
 
-			//if pieces didn't move, move back to the starting position and deselct
-			if (!moved)
-			{
-				VariableManager.SelectedCell.Pos = VariableManager.InitialPos;
-				SelectionHandler(VariableManager.SelectedCell);
+               //deselect piece and move cell back to initial position
+               VariableManager.SelectedCell.Pos = VariableManager.InitialPos;
+               SelectionHandler(VariableManager.SelectedCell);
 
+               //if pieces didn't move, return
+               if (!moved) 
 				return;
-			}
 
 
 			//update visuals and history
-			VariableManager.HandleMoveUpdates();
-
-               //move a piece to new position, change turn, and deselect piece and button
-               VariableManager.SelectedCell.Pos = VariableManager.InitialPos;
-               SelectionHandler(VariableManager.SelectedCell);
+			VariableManager.HandleMoveUpdates(takePiece);
 
 			//check to see if the game is over
 			if (VariableManager.State != GameState.Playing)

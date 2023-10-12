@@ -39,5 +39,51 @@ namespace Chess.Views
                get { return this.gameWinner; }
                set { this.gameWinner = value; RaisePropertyChanged(() => this.GameWinner); }
           }
+
+
+          private string frontPlayer;
+          public string FrontPlayer
+          {
+               get { return this.frontPlayer; }
+               set { this.frontPlayer = value; RaisePropertyChanged(() => this.FrontPlayer); }
+          }
+
+
+          private string frontPlayerTakes;
+          public string FrontPlayerTakes
+          {
+               get { return this.frontPlayerTakes; }
+               set { this.frontPlayerTakes = value; RaisePropertyChanged(() => this.FrontPlayerTakes); }
+          }
+
+
+          private string backPlayer;
+          public string BackPlayer
+          {
+               get { return this.backPlayer; }
+               set { this.backPlayer = value; RaisePropertyChanged(() => this.BackPlayer); }
+          }
+
+          private string backPlayerTakes;
+          public string BackPlayerTakes
+          {
+               get { return this.backPlayerTakes; }
+               set { this.backPlayerTakes = value; RaisePropertyChanged(() => this.BackPlayerTakes); }
+          }
+
+
+          private int selectedAI;
+          public int SelectedAI
+          {
+               get { return this.selectedAI; }
+               set { this.selectedAI = value; RaisePropertyChanged(() => this.SelectedAI); }
+          }
+
+          private int setupSelectedAI;
+          public int SetupSelectedAI
+          {
+               get { return this.setupSelectedAI; }
+               set { this.setupSelectedAI = value; RaisePropertyChanged(() => this.SetupSelectedAI); }
+          }
      }
 }

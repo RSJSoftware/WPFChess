@@ -38,8 +38,9 @@
           <ComboBox x:Name="BitboardComboBox" 
                     Grid.Row="8" Grid.ColumnSpan="2" 
                     Width="180" Height="25"
+                    SelectedIndex="{Binding Path=SetupSelectedAI}"
                     SelectedValuePath="Content">
-               <ComboBoxItem x:Name="noAI" IsSelected="True">No AI</ComboBoxItem>
+               <ComboBoxItem x:Name="noAI">No AI</ComboBoxItem>
                <ComboBoxItem x:Name="RandAI">Random AI</ComboBoxItem>
           </ComboBox>
 
@@ -49,7 +50,7 @@
 
           <StackPanel Grid.Row="11" Grid.Column="0">
                <ToggleButton x:Name="whitePawn" 
-                             Height="75" Width="75"
+                             Height="65" Width="65"
                              Background="Transparent"
                              BorderThickness="0"
                              Checked="HandleSelection"
@@ -57,7 +58,7 @@
                     <Image Source="{StaticResource whitePawnImage}"/>
                </ToggleButton>
                <ToggleButton x:Name="whiteKnight" 
-                             Height="75" Width="75"
+                             Height="65" Width="65"
                              Background="Transparent"
                              BorderThickness="0"
                              Checked="HandleSelection"
@@ -65,7 +66,7 @@
                     <Image Source="{StaticResource whiteKnightImage}"/>
                </ToggleButton>
                <ToggleButton x:Name="whiteBishop" 
-                             Height="75" Width="75"
+                             Height="65" Width="65"
                              Background="Transparent"
                              BorderThickness="0"
                              Checked="HandleSelection"
@@ -73,7 +74,7 @@
                     <Image Source="{StaticResource whiteBishopImage}"/>
                </ToggleButton>
                <ToggleButton x:Name="whiteRook" 
-                             Height="75" Width="75"
+                             Height="65" Width="65"
                              Background="Transparent"
                              BorderThickness="0"
                              Checked="HandleSelection"
@@ -81,7 +82,7 @@
                     <Image Source="{StaticResource whiteRookImage}"/>
                </ToggleButton>
                <ToggleButton x:Name="whiteQueen" 
-                             Height="75" Width="75"
+                             Height="65" Width="65"
                              Background="Transparent"
                              BorderThickness="0"
                              Checked="HandleSelection"
@@ -89,7 +90,7 @@
                     <Image Source="{StaticResource whiteQueenImage}"/>
                </ToggleButton>
                <ToggleButton x:Name="whiteKing" 
-                             Height="75" Width="75"
+                             Height="65" Width="65"
                              Background="Transparent"
                              BorderThickness="0"
                              Checked="HandleSelection"
@@ -101,7 +102,7 @@
 
           <StackPanel Grid.Row="11" Grid.Column="1">
                <ToggleButton x:Name="blackPawn" 
-                             Height="75" Width="75"
+                             Height="65" Width="65"
                              Background="Transparent"
                              BorderThickness="0"
                              Checked="HandleSelection"
@@ -109,7 +110,7 @@
                     <Image Source="{StaticResource blackPawnImage}"/>
                </ToggleButton>
                <ToggleButton x:Name="blackKnight" 
-                             Height="75" Width="75"
+                             Height="65" Width="65"
                              Background="Transparent"
                              BorderThickness="0"
                              Checked="HandleSelection"
@@ -117,7 +118,7 @@
                     <Image Source="{StaticResource blackKnightImage}"/>
                </ToggleButton>
                <ToggleButton x:Name="blackBishop" 
-                             Height="75" Width="75"
+                             Height="65" Width="65"
                              Background="Transparent"
                              BorderThickness="0"
                              Checked="HandleSelection"
@@ -125,7 +126,7 @@
                     <Image Source="{StaticResource blackBishopImage}"/>
                </ToggleButton>
                <ToggleButton x:Name="blackRook" 
-                             Height="75" Width="75"
+                             Height="65" Width="65"
                              Background="Transparent"
                              BorderThickness="0"
                              Checked="HandleSelection"
@@ -133,7 +134,7 @@
                     <Image Source="{StaticResource blackRookImage}"/>
                </ToggleButton>
                <ToggleButton x:Name="blackQueen" 
-                             Height="75" Width="75"
+                             Height="65" Width="65"
                              Background="Transparent"
                              BorderThickness="0"
                              Checked="HandleSelection"
@@ -141,12 +142,20 @@
                     <Image Source="{StaticResource blackQueenImage}"/>
                </ToggleButton>
                <ToggleButton x:Name="blackKing" 
-                             Height="75" Width="75"
+                             Height="65" Width="65"
                              Background="Transparent"
                              BorderThickness="0"
                              Checked="HandleSelection"
                              Unchecked="HandleDeselection">
                     <Image Source="{StaticResource blackKingImage}"/>
+               </ToggleButton>
+               <ToggleButton x:Name="trash" 
+                             Height="65" Width="65"
+                             Background="Transparent"
+                             BorderThickness="0"
+                             Checked="HandleSelection"
+                             Unchecked="HandleDeselection">
+                    <Image Source="{StaticResource UITrashCan}"/>
                </ToggleButton>
           </StackPanel>
           

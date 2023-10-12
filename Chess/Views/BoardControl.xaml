@@ -9,38 +9,50 @@
      <Grid>
           <ComboBox x:Name="BitboardComboBox" 
                     Grid.Row="0" Grid.Column="1"  Grid.ColumnSpan="2" 
-                    Width="180" Height="25"
+                    Width="180" Height="20"
+                    SelectedIndex="{Binding Path=SelectedAI}"
                     SelectionChanged="BitboardComboBox_SelectionChanged"
                     SelectedValuePath="Content">
-               <ComboBoxItem x:Name="noAI" IsSelected="True">No AI</ComboBoxItem>
+               <ComboBoxItem x:Name="noAI">No AI</ComboBoxItem>
                <ComboBoxItem x:Name="RandAI">Random AI</ComboBoxItem>
           </ComboBox>
-          
-          <local:MainBoard Grid.Row="1" Grid.RowSpan="8" Grid.Column="1" Grid.ColumnSpan="8"/>
 
-          <Label x:Name="lb8" Style="{StaticResource BoardText}" Grid.Row="1" Grid.Column="0">8</Label>
-          <Label x:Name="lb7" Style="{StaticResource BoardText}" Grid.Row="2" Grid.Column="0">7</Label>
-          <Label x:Name="lb6" Style="{StaticResource BoardText}" Grid.Row="3" Grid.Column="0">6</Label>
-          <Label x:Name="lb5" Style="{StaticResource BoardText}" Grid.Row="4" Grid.Column="0">5</Label>
-          <Label x:Name="lb4" Style="{StaticResource BoardText}" Grid.Row="5" Grid.Column="0">4</Label>
-          <Label x:Name="lb3" Style="{StaticResource BoardText}" Grid.Row="6" Grid.Column="0">3</Label>
-          <Label x:Name="lb2" Style="{StaticResource BoardText}" Grid.Row="7" Grid.Column="0">2</Label>
-          <Label x:Name="lb1" Style="{StaticResource BoardText}" Grid.Row="8" Grid.Column="0">1</Label>
+          <Label x:Name="BackPlayer" Style="{StaticResource BoardText}" Content="{Binding Path=BackPlayer}"
+                 Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="2"/>
 
-          <Label x:Name="lba" Style="{StaticResource BoardText}" Grid.Row="9" Grid.Column="1">a</Label>
-          <Label x:Name="lbb" Style="{StaticResource BoardText}" Grid.Row="9" Grid.Column="2">b</Label>
-          <Label x:Name="lbc" Style="{StaticResource BoardText}" Grid.Row="9" Grid.Column="3">c</Label>
-          <Label x:Name="lbd" Style="{StaticResource BoardText}" Grid.Row="9" Grid.Column="4">d</Label>
-          <Label x:Name="lbe" Style="{StaticResource BoardText}" Grid.Row="9" Grid.Column="5">e</Label>
-          <Label x:Name="lbf" Style="{StaticResource BoardText}" Grid.Row="9" Grid.Column="6">f</Label>
-          <Label x:Name="lbg" Style="{StaticResource BoardText}" Grid.Row="9" Grid.Column="7">g</Label>
-          <Label x:Name="lbh" Style="{StaticResource BoardText}" Grid.Row="9" Grid.Column="8">h</Label>
+          <Label x:Name="BackPlayerTakes" Style="{StaticResource BoardText}" Content="{Binding Path=BackPlayerTakes}"
+                 Grid.Row="1" Grid.Column="7" Grid.ColumnSpan="2" FontSize="15"/>
 
+          <local:MainBoard Grid.Row="2" Grid.RowSpan="8" Grid.Column="1" Grid.ColumnSpan="8"/>
 
-          <Button x:Name="BtnNewGame" Grid.Row="10" Grid.Column="1" Style="{StaticResource UIButton}" Click="NewGame">
+          <Label x:Name="lb8" Style="{StaticResource BoardText}" Grid.Row="2" Grid.Column="0">8</Label>
+          <Label x:Name="lb7" Style="{StaticResource BoardText}" Grid.Row="3" Grid.Column="0">7</Label>
+          <Label x:Name="lb6" Style="{StaticResource BoardText}" Grid.Row="4" Grid.Column="0">6</Label>
+          <Label x:Name="lb5" Style="{StaticResource BoardText}" Grid.Row="5" Grid.Column="0">5</Label>
+          <Label x:Name="lb4" Style="{StaticResource BoardText}" Grid.Row="6" Grid.Column="0">4</Label>
+          <Label x:Name="lb3" Style="{StaticResource BoardText}" Grid.Row="7" Grid.Column="0">3</Label>
+          <Label x:Name="lb2" Style="{StaticResource BoardText}" Grid.Row="8" Grid.Column="0">2</Label>
+          <Label x:Name="lb1" Style="{StaticResource BoardText}" Grid.Row="9" Grid.Column="0">1</Label>
+
+          <Label x:Name="lba" Style="{StaticResource BoardText}" Grid.Row="10" Grid.Column="1">a</Label>
+          <Label x:Name="lbb" Style="{StaticResource BoardText}" Grid.Row="10" Grid.Column="2">b</Label>
+          <Label x:Name="lbc" Style="{StaticResource BoardText}" Grid.Row="10" Grid.Column="3">c</Label>
+          <Label x:Name="lbd" Style="{StaticResource BoardText}" Grid.Row="10" Grid.Column="4">d</Label>
+          <Label x:Name="lbe" Style="{StaticResource BoardText}" Grid.Row="10" Grid.Column="5">e</Label>
+          <Label x:Name="lbf" Style="{StaticResource BoardText}" Grid.Row="10" Grid.Column="6">f</Label>
+          <Label x:Name="lbg" Style="{StaticResource BoardText}" Grid.Row="10" Grid.Column="7">g</Label>
+          <Label x:Name="lbh" Style="{StaticResource BoardText}" Grid.Row="10" Grid.Column="8">h</Label>
+
+          <Label x:Name="FrontPlayer" Style="{StaticResource BoardText}" Content="{Binding Path=FrontPlayer}"
+                 Grid.Row="11" Grid.Column="1" Grid.ColumnSpan="2"/>
+          <Label x:Name="FrontPlayerTakes" Style="{StaticResource BoardText}" Content="{Binding Path=FrontPlayerTakes}"
+                 Grid.Row="11" Grid.Column="7" Grid.ColumnSpan="2" FontSize="15"/>
+
+          <Button x:Name="BtnNewGame" Grid.Row="12" Grid.Column="1" Style="{StaticResource UIButton}" Click="NewGame"
+                  Height="50" Width="50">
                <TextBlock Height="auto" 
                         Width="auto" 
-                        FontSize="20"
+                        FontSize="12"
                         FontWeight="Bold"
                         Foreground="{StaticResource foregroundColor}" 
                         TextWrapping="Wrap"
@@ -48,23 +60,24 @@
                         Background="Transparent">New Game</TextBlock>
           </Button>
 
-          <Button x:Name="BtnBeginning" Grid.Row="10" Grid.Column="3" Style="{StaticResource UIButton}" Click="SetBeginning">
-               <Image Height="50" Width="50" Source="{StaticResource UIBeginningArrow}"></Image>
+          <Button x:Name="BtnBeginning" Grid.Row="12" Grid.Column="3" Style="{StaticResource UIButton}" Click="SetBeginning">
+               <Image Height="30" Width="30" Source="{StaticResource UIBeginningArrow}"></Image>
           </Button>
-          <Button x:Name="BtnBack" Grid.Row="10" Grid.Column="4" Style="{StaticResource UIButton}" Click="SetBack">
-               <Image Height="50" Width="50" Source="{StaticResource UIBackArrow}"></Image>
+          <Button x:Name="BtnBack" Grid.Row="12" Grid.Column="4" Style="{StaticResource UIButton}" Click="SetBack">
+               <Image Height="30" Width="30" Source="{StaticResource UIBackArrow}"></Image>
           </Button>
-          <Button x:Name="BtnForward" Grid.Row="10" Grid.Column="5" Style="{StaticResource UIButton}" Click="SetForward">
-               <Image Height="50" Width="50" Source="{StaticResource UIForwardArrow}"></Image>
+          <Button x:Name="BtnForward" Grid.Row="12" Grid.Column="5" Style="{StaticResource UIButton}" Click="SetForward">
+               <Image Height="30" Width="30" Source="{StaticResource UIForwardArrow}"></Image>
           </Button>
-          <Button x:Name="BtnEnd" Grid.Row="10" Grid.Column="6" Style="{StaticResource UIButton}" Click="SetEnd">
-               <Image Height="50" Width="50" Source="{StaticResource UIEndArrow}"></Image>
+          <Button x:Name="BtnEnd" Grid.Row="12" Grid.Column="6" Style="{StaticResource UIButton}" Click="SetEnd">
+               <Image Height="30" Width="30" Source="{StaticResource UIEndArrow}"></Image>
           </Button>
-          <Button x:Name="BtnFlip" Grid.Row="10" Grid.Column="8" Style="{StaticResource UIButton}" Click="FlipBoard">
-               <Image Height="50" Width="50" Source="{StaticResource UIFlipArrow}"></Image>
+          <Button x:Name="BtnFlip" Grid.Row="12" Grid.Column="8" Style="{StaticResource UIButton}" Click="FlipBoard">
+               <Image Height="30" Width="30" Source="{StaticResource UIFlipArrow}"></Image>
           </Button>
           <Grid.RowDefinitions>
-               <RowDefinition Height="50"/>
+               <RowDefinition Height="25"/>
+               <RowDefinition Height="25"/>
                <RowDefinition Height="100"/>
                <RowDefinition Height="100"/>
                <RowDefinition Height="100"/>
@@ -74,7 +87,8 @@
                <RowDefinition Height="100"/>
                <RowDefinition Height="100"/>
                <RowDefinition Height="25"/>
-               <RowDefinition Height="75"/>
+               <RowDefinition Height="25"/>
+               <RowDefinition Height="50"/>
           </Grid.RowDefinitions>
           <Grid.ColumnDefinitions>
                <ColumnDefinition Width="25"/>

@@ -12,6 +12,8 @@ namespace Chess.Views
           public BoardControl()
           {
                InitializeComponent();
+
+               DataContext = VariableManager.Labels;
           }
 
           private void NewGame(object sender, System.Windows.RoutedEventArgs e)

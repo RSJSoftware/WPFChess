@@ -9,6 +9,6 @@ namespace Chess.AI
      public interface IChessAI
      {
           int Think();
-          bool Move(int moveIndex);
+          Piece Move(int moveIndex);
      }
 }

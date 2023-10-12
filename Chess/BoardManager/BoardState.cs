@@ -457,8 +457,6 @@ namespace Chess.BoardManager
 				}
 			}
 
-			//TODO add a board check for legal positions, if illegal, recursively call for an initial position
-
 			//get legal moves
 			LegalMoves = Board.GetMoveDictionary(Turn, EnPassantSquare, CastleRights);
 			MoveList.Clear();

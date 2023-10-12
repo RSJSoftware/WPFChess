@@ -2,7 +2,6 @@
 using Chess.Perft;
 using System;
 using System.Linq;
-using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Controls;
 
@@ -13,14 +12,11 @@ namespace Chess.Views
      /// </summary>
      public partial class DebugMenu : UserControl
      {
-          private LabelManager lbman;
           readonly bool[] highlights = new bool[12];
           public DebugMenu()
           {
                InitializeComponent();
-
-               lbman = VariableManager.Labels;
-               DataContext = lbman;
+               DataContext = VariableManager.Labels;
           }
 
           private void HighlightBitboard(object sender, RoutedEventArgs e)
@@ -56,17 +52,17 @@ namespace Chess.Views
 
           private void PerftTest(object sender, RoutedEventArgs e)
           {
-               lbman.Debug = "Performing PERFT test: Depth " + PerftText.Text;
+               VariableManager.Labels.Debug = "Performing PERFT test: Depth " + PerftText.Text;
                
                if (Int32.TryParse(PerftText.Text, out int depth))
                {
                     PerftErrorLabel.Visibility = Visibility.Hidden;
                     Driver.PerftDriver(depth, VariableManager.Board);
-                    lbman.PerftStats = $"mov: {Driver.nodes}\ncap: {Driver.captures}\nep: {Driver.enPassants}\n" +
+                    VariableManager.Labels.PerftStats = $"mov: {Driver.nodes}\ncap: {Driver.captures}\nep: {Driver.enPassants}\n" +
                          $"cas: {Driver.castles}\npro: {Driver.promotions}\nche: {Driver.checks}\nmat: {Driver.checkmates}\ntime: {Driver.stopwatch.ElapsedMilliseconds}ms ";
 
-                    lbman.PerftMoves = Driver.moveDebug;
-                    lbman.Debug = "Performing PERFT test at Depth " + PerftText.Text + " completed!";
+                    VariableManager.Labels.PerftMoves = Driver.moveDebug;
+                    VariableManager.Labels.Debug = "Performing PERFT test at Depth " + PerftText.Text + " completed!";
                }
                else
                {

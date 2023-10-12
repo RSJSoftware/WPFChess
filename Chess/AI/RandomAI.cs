@@ -20,9 +20,11 @@ namespace Chess.AI
                return randomNumber.Next(0, Board.LegalMoves.Count);
           }
 
-          public bool Move(int moveIndex)
+          public Piece Move(int moveIndex)
           {
-               return Board.MovePiece(Board.LegalMoves[moveIndex]);
+               Piece takePiece = Board.LegalMoves[moveIndex].TakePiece;
+               Board.MovePiece(Board.LegalMoves[moveIndex]);
+               return takePiece;
           }
      }
 }
